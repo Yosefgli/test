@@ -798,11 +798,11 @@
     const payload = buildPayload();
 
     // guardrails
-    if(!SYSTEM_API_KEY || SYSTEM_API_KEY === "PUT_YOUR_SYSTEM_API_KEY_HERE"){
+    if(!SYSTEM_API_KEY || SYSTEM_API_KEY === "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba"){
       showToast("err", "חסר SYSTEM_API_KEY", "שים את מפתח המערכת בתוך הקוד ב-SYSTEM_API_KEY.");
       return;
     }
-    if(!SUPABASE_APIKEY || SUPABASE_APIKEY === "PUT_YOUR_SUPABASE_APIKEY_HERE" || !SUPABASE_BEARER_TOKEN || SUPABASE_BEARER_TOKEN === "PUT_YOUR_SUPABASE_BEARER_HERE"){
+    if(!SUPABASE_APIKEY || SUPABASE_APIKEY === "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA" || !SUPABASE_BEARER_TOKEN || SUPABASE_BEARER_TOKEN === "PUT_YOUR_SUPABASE_BEARER_HERE"){
       showToast("err", "חסרים headers של Supabase", "שים apikey ו-token בתוך הקוד (SUPABASE_APIKEY / SUPABASE_BEARER_TOKEN).");
       return;
     }
