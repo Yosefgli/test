@@ -58,7 +58,7 @@
 
     .hint{color:var(--muted);font-size:13px;line-height:1.4}
     label{display:block;font-size:13px;margin:0 0 6px;color:#334155}
-    input, select, textarea{
+    input, select{
       width:100%;
       padding:11px 12px;
       border:1px solid var(--line);
@@ -68,7 +68,7 @@
       outline:none;
       transition:.15s;
     }
-    input:focus, select:focus, textarea:focus{box-shadow:var(--focus);border-color:#93c5fd}
+    input:focus, select:focus{box-shadow:var(--focus);border-color:#93c5fd}
 
     .btn{
       appearance:none;border:0;cursor:pointer;
@@ -321,7 +321,6 @@
         </div>
 
         <div class="divider"></div>
-
         <div id="scanItemsPreview" class="items"></div>
       </div>
 
@@ -375,30 +374,29 @@
   // ========= CONFIG =========
   const API_URL = "https://flebwvluqixxuhrcmuxe.supabase.co/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
 
-  // שים כאן את המפתח בתוך הקוד (לא מוצג בשדה)
+  // 1) המפתח שהפונקציה שלך מצפה לקבל בגוף תחת p_api_key (של המערכת שלך)
   const SYSTEM_API_KEY = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
+
+  // 2) Supabase headers (כמו שכתבת)
+  const SUPABASE_APIKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA";
+  // שים לב: כאן שומרים את הטוקן בלי המילה "Bearer"
+  const SUPABASE_BEARER_TOKEN = SUPABASE_APIKEY;
 
   // ========= STATE =========
   /** @type {{barcode:string, qty:number, note_he:string}[]} */
   let items = [];
   let currentMode = "scan"; // "scan" | "review"
 
-  // Scan detection
   let scanBuffer = "";
   let scanTimer = null;
-
-  // Manual input debounce
   let manualTimer = null;
 
-  // Qty modal
   let pendingBarcode = null;
-  let editingIndex = null; // null=new/merge, number=edit existing
+  let editingIndex = null;
 
   const $ = (id) => document.getElementById(id);
 
-  function sumQty(){
-    return items.reduce((a,b)=>a + (Number(b.qty)||0), 0);
-  }
+  function sumQty(){ return items.reduce((a,b)=>a + (Number(b.qty)||0), 0); }
 
   function showToast(type, title, desc){
     const t = $("toast");
@@ -432,8 +430,7 @@
   function normalizeBarcode(s){ return String(s || "").trim(); }
   function isLikelyBarcode(s){
     const v = normalizeBarcode(s);
-    if(v.length < 6) return false;
-    return true;
+    return v.length >= 6;
   }
 
   function openQtyModal(barcode, indexToEdit=null){
@@ -442,12 +439,10 @@
 
     $("mBarcode").textContent = barcode;
 
-    // אם עריכה/קיים -> להציג ערכים
     if(indexToEdit !== null){
       $("mQty").value = String(items[indexToEdit].qty ?? 1);
       $("mItemNote").value = items[indexToEdit].note_he ?? "";
     }else{
-      // אם קיים פריט באותו ברקוד — ערוך במקום כפילות
       const existingIdx = items.findIndex(x => x.barcode === barcode);
       if(existingIdx !== -1){
         editingIndex = existingIdx;
@@ -501,30 +496,22 @@
     }
 
     closeQtyModal();
-    renderScanPreview(true); // חשוב: מכווץ אחרי סריקה
+    renderScanPreview();
   }
 
   function clearItems(){
     items = [];
-    renderScanPreview(true);
-    if(currentMode === "review"){
-      renderReview();
-      refreshJsonPreview();
-    }
+    renderScanPreview();
+    if(currentMode === "review"){ renderReview(); refreshJsonPreview(); }
   }
 
   function deleteItem(index){
     items.splice(index, 1);
-    renderScanPreview(true);
-    if(currentMode === "review"){
-      renderReview();
-      refreshJsonPreview();
-    }
+    renderScanPreview();
+    if(currentMode === "review"){ renderReview(); refreshJsonPreview(); }
   }
 
-  // ======= Preview list (SCAN MODE) =======
-  // דרישה: אחרי סריקה + בחירת כמות -> שיישאר מכווץ (לא נפתח)
-  function renderScanPreview(forceCollapse=false){
+  function renderScanPreview(){
     $("kpiCount").textContent = String(items.length);
     $("kpiSum").textContent = String(sumQty());
     $("finishBtn").disabled = items.length === 0;
@@ -537,15 +524,12 @@
       return;
     }
 
-    // הצגה מהחדש לישן
     items.slice().reverse().forEach((it, revIdx)=>{
       const idx = items.length - 1 - revIdx;
 
       const d = document.createElement("details");
       d.className = "item";
-
-      // תמיד מכווץ כברירת מחדל (גם לאחר הוספה)
-      d.open = false;
+      d.open = false; // תמיד מכווץ
 
       d.innerHTML = `
         <summary>
@@ -584,12 +568,9 @@
   }
   function backToScan(){
     setMode("scan");
-    // דרישה: "ברגע שאעשה סיום הוא יכווץ חזרה"
-    // כשחוזרים לסריקה אחרי סיום/סקירה, גם כאן נשאיר מכווץ.
-    renderScanPreview(true);
+    renderScanPreview();
   }
 
-  // ========= REVIEW =========
   function buildPayload(){
     const fromLoc = $("fromLoc").value;
     const toLoc   = $("toLoc").value;
@@ -624,11 +605,10 @@
       return;
     }
 
-    // דרישה: בסיום ("סקירה") הרשימה תהיה מכווצת כברירת מחדל
     items.forEach((it, idx)=>{
       const d = document.createElement("details");
       d.className = "item";
-      d.open = false;
+      d.open = false; // מכווץ כברירת מחדל גם בסיום
 
       d.innerHTML = `
         <summary>
@@ -638,7 +618,7 @@
             <span class="mono" title="${escapeHtml(it.barcode)}">${escapeHtml(it.barcode)}</span>
           </div>
           <div class="rightActions">
-            <button class="btn" type="button" onclick="editItemFromReview(${idx})">ערוך</button>
+            <button class="btn" type="button" onclick="editItem(${idx})">ערוך</button>
             <button class="btn danger" type="button" onclick="deleteItem(${idx})">מחק</button>
           </div>
         </summary>
@@ -659,11 +639,6 @@
     });
   }
 
-  function editItemFromReview(index){
-    // עריכה דרך מודאל -> זה מתאים לזרימה שלך
-    editItem(index);
-  }
-
   function updateQtyInline(index, v){
     let n = Number(v);
     if(!isFinite(n) || n < 1) return;
@@ -682,8 +657,12 @@
 
     const payload = buildPayload();
 
-    if(!SYSTEM_API_KEY || SYSTEM_API_KEY === "YOUR_SYSTEM_API_KEY"){
-      showToast("err", "חסר מפתח מערכת בקוד", "עדכן את SYSTEM_API_KEY בתוך הקובץ לפני שימוש.");
+    if(!SYSTEM_API_KEY){
+      showToast("err", "חסר SYSTEM_API_KEY", "המפתח של המערכת (p_api_key) ריק בקוד.");
+      return;
+    }
+    if(!SUPABASE_APIKEY || !SUPABASE_BEARER_TOKEN){
+      showToast("err", "חסרים headers של Supabase", "חייב apikey וגם Authorization.");
       return;
     }
     if(payload.p_items.length === 0){
@@ -695,12 +674,15 @@
     $("sendBtn").textContent = "שולח...";
 
     try{
+      // דיבוג קצר (אם תרצה לראות מה באמת נשלח)
+      // console.log("payload:", payload);
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
-          "Content-Type":"application/json"
-          // אם אצלך Supabase דורש גם apikey/Authorization headers,
-          // תוסיף כאן לפי ההגדרות שלך.
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_APIKEY,
+          "Authorization": "Bearer " + SUPABASE_BEARER_TOKEN
         },
         body: JSON.stringify(payload)
       });
@@ -714,11 +696,7 @@
           "הפעולה בוצעה בהצלחה.\n\nתגובה מהשרת:\n" + (data ? JSON.stringify(data, null, 2) : (text || "(ריק)"))
         );
       }else{
-        const errMsg =
-          (data && (data.message || data.error || data.details)) ?
-            JSON.stringify(data, null, 2) :
-            (text || `HTTP ${res.status}`);
-
+        const errMsg = (data ? JSON.stringify(data, null, 2) : (text || `HTTP ${res.status}`));
         openResultModal(false, "שגיאה ❌",
           "הייתה שגיאה בביצוע הפעולה.\n\nפרטים:\n" + errMsg
         );
@@ -728,8 +706,6 @@
     }finally{
       $("sendBtn").disabled = false;
       $("sendBtn").textContent = "שלח";
-      // במקרה ששליחה נכשלה — נשארים בסקירה עם הרשימה
-      // במקרה של הצלחה — הכפתור במודאל יחזיר להתחלה
     }
   }
 
@@ -758,7 +734,7 @@
     $("fromLoc").value = "WAREHOUSE";
     $("toLoc").value = "PICKING";
     setMode("scan");
-    renderScanPreview(true);
+    renderScanPreview();
   }
 
   // ========= SCAN CAPTURE (NO ENTER REQUIRED) =========
@@ -799,7 +775,6 @@
     }, 220);
   }
 
-  // ========= SAFE HTML =========
   function escapeHtml(s){
     return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
   }
@@ -807,7 +782,6 @@
     return escapeHtml(s).replaceAll("'","&#39;");
   }
 
-  // ========= INIT =========
   window.addEventListener("keydown", handleGlobalKeydown);
   $("manualBarcode").addEventListener("input", handleManualInput);
 
@@ -815,7 +789,7 @@
     $(id).addEventListener("change", ()=>{ if(currentMode === "review") refreshJsonPreview(); });
   });
 
-  renderScanPreview(true);
+  renderScanPreview();
   setMode("scan");
 </script>
 </body>
