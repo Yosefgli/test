@@ -5,69 +5,83 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>העברת מלאי לפי ברקוד</title>
   <style>
-    :root{--bg:#f6f7fb;--card:#fff;--txt:#0f172a;--mut:#64748b;--line:#e2e8f0;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626;}
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Arial;background:linear-gradient(#fff,var(--bg));color:var(--txt)}
+    :root{
+      --bg:#f6f7fb; --card:#fff; --txt:#0f172a; --mut:#64748b; --line:#e2e8f0;
+      --pri:#2563eb; --pri2:#1d4ed8; --ok:#16a34a; --bad:#dc2626; --warn:#f59e0b;
+      --shadow:0 10px 26px rgba(2,6,23,.08);
+      --r:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Arial;background:linear-gradient(#fff,var(--bg));color:var(--txt)}
     .wrap{max-width:980px;margin:0 auto;padding:16px}
     header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin:6px 0 12px}
-    h1{margin:0;font-size:18px} .sub{margin:4px 0 0;color:var(--mut);font-size:13px}
+    h1{margin:0;font-size:18px}
+    .sub{margin:4px 0 0;color:var(--mut);font-size:13px}
     .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 26px rgba(2,6,23,.08);overflow:hidden}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
     .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:linear-gradient(#fff,#f8fafc)}
     .hd b{font-size:14px}
     .bd{padding:14px}
-    label{display:block;font-size:12px;color:#334155;margin-bottom:6px}
+    label{display:block;font-size:12px;color:#334155;margin:0 0 6px}
     input,select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;outline:none}
     input:focus,select:focus{box-shadow:0 0 0 4px rgba(37,99,235,.15);border-color:#93c5fd}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .row > *{flex:1}
-    .btn{border:1px solid var(--line);background:#fff;color:var(--txt);padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
+    .btn{border:1px solid var(--line);background:#fff;color:var(--txt);padding:10px 12px;border-radius:12px;font-weight:900;cursor:pointer}
     .btn:hover{background:#f8fafc}
     .btn.pri{background:var(--pri);border-color:transparent;color:#fff}
-    .btn.pri:hover{filter:brightness(.95)}
+    .btn.pri:hover{background:var(--pri2)}
     .btn.ok{background:var(--ok);border-color:transparent;color:#fff}
     .btn.bad{border-color:rgba(220,38,38,.25);color:var(--bad)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .kpi .box{flex:1;min-width:160px;border:1px solid var(--line);border-radius:14px;padding:10px;background:linear-gradient(#fff,#f8fafc)}
-    .kpi .n{font-size:20px;font-weight:900;margin:0}
+    .kpi .n{font-size:20px;font-weight:1000;margin:0}
     .kpi .t{font-size:12px;color:var(--mut);margin:2px 0 0}
     .items{display:flex;flex-direction:column;gap:10px}
     details{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
     summary{list-style:none;cursor:pointer;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
     summary::-webkit-details-marker{display:none}
     .left{min-width:0;flex:1}
-    .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .name{font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .meta{color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tag{font-size:12px;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;white-space:nowrap}
     .tag.warn{border-color:#fde68a;background:#fffbeb;color:#92400e}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
     .body{border-top:1px solid var(--line);background:#f8fafc;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media (max-width:640px){.body{grid-template-columns:1fr}}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    .hint{color:var(--mut);font-size:12px}
+    .sep{height:10px}
+
+    /* toast */
     .toast{position:fixed;inset:16px 16px auto 16px;display:flex;justify-content:center;z-index:9999;pointer-events:none}
     .toast > div{pointer-events:auto;max-width:980px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 10px 26px rgba(2,6,23,.12);display:none;gap:10px;align-items:flex-start;white-space:pre-wrap}
-    .toast .show{display:flex}
     .toast .ok{border-color:rgba(22,163,74,.35)}
     .toast .err{border-color:rgba(220,38,38,.35)}
     .toast b{display:block}
     .toast p{margin:2px 0 0;color:var(--mut);font-size:13px}
-    .modalO{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:9998}
-    .modalO.show{display:flex}
-    .modal{width:min(560px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(2,6,23,.2);overflow:hidden}
+
+    /* modals */
+    .mo{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:9998}
+    .mo.show{display:flex}
+    .m{width:min(560px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(2,6,23,.2);overflow:hidden}
     .mhd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#fff,#f8fafc)}
     .mbd{padding:14px}
     .mft{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;background:#fff}
+
     .qtyRow{display:flex;gap:10px;justify-content:center;align-items:center;margin:10px 0}
-    .qbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:22px;font-weight:900;cursor:pointer}
+    .qbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:22px;font-weight:1000;cursor:pointer}
     .qbtn:hover{background:#f8fafc}
-    .qinp{width:120px;text-align:center;font-size:18px;font-weight:900}
+    .qinp{width:120px;text-align:center;font-size:18px;font-weight:1000}
+
     .snap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(#fff,#f8fafc);padding:10px 12px;margin-bottom:12px}
     .snap .top{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}
-    .snap .top .n{font-weight:900}
+    .snap .top .n{font-weight:1000}
     .snap .top .m{color:var(--mut);font-size:12px}
     .stock{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
     .stock li{display:flex;justify-content:space-between;gap:10px;font-size:13px}
-    .hint{color:var(--mut);font-size:12px}
-    /* hidden scan sink */
+
+    /* scan sink */
     #scanSink{position:fixed;left:-9999px;top:-9999px;opacity:0;height:1px;width:1px}
   </style>
 </head>
@@ -83,12 +97,12 @@
     </div>
   </div>
 
-  <!-- Always-focused sink to catch scanner input reliably -->
+  <!-- scan sink (קולט סריקות יציב) -->
   <input id="scanSink" autocomplete="off" />
 
   <!-- Qty modal -->
-  <div class="modalO" id="qtyModal">
-    <div class="modal">
+  <div class="mo" id="qtyMo">
+    <div class="m">
       <div class="mhd">
         <b>בחר כמות</b>
         <button class="btn" onclick="closeQty()">ביטול</button>
@@ -100,14 +114,14 @@
             <div class="m"><span class="mono" id="mBarcode"></span></div>
           </div>
           <div class="row" style="gap:8px">
-            <div class="tag" id="snapSkuTag">מק״ט: —</div>
-            <div class="tag" id="snapWhTag">מחסן: —</div>
+            <div class="tag" id="snapSku">מק״ט: —</div>
+            <div class="tag" id="snapWh">מחסן: —</div>
           </div>
           <div style="margin-top:10px">
             <div class="hint">מלאי לפי מיקומים</div>
             <ul class="stock" id="snapStock"><li class="hint">טוען…</li></ul>
           </div>
-          <div class="hint" id="snapErr" style="display:none;color:var(--bad);margin-top:8px">לא הצלחתי להביא פרטי מוצר (אפשר להמשיך).</div>
+          <div class="hint" id="snapErr" style="display:none;color:var(--bad);margin-top:8px"></div>
         </div>
 
         <div class="qtyRow">
@@ -126,8 +140,8 @@
   </div>
 
   <!-- Result modal -->
-  <div class="modalO" id="resModal">
-    <div class="modal">
+  <div class="mo" id="resMo">
+    <div class="m">
       <div class="mhd">
         <b id="rTitle">סטטוס</b>
         <button class="btn" onclick="closeRes()">סגור</button>
@@ -136,7 +150,7 @@
         <div class="hint" id="rBody" style="white-space:pre-wrap"></div>
       </div>
       <div class="mft">
-        <button class="btn ok" id="rBtn" onclick="resetAll()">חזרה להתחלה</button>
+        <button class="btn ok" id="rBtn">חזרה</button>
       </div>
     </div>
   </div>
@@ -145,7 +159,7 @@
     <header>
       <div>
         <h1>העברת מלאי לפי ברקוד</h1>
-        <div class="sub">סורק עובד בכל מצב (גם במסך סיום) · בוחר כמות מיד · שולח הכל בפעם אחת</div>
+        <div class="sub">סריקה → snapshot → כמות → סיום → שליחה אחת</div>
       </div>
       <div class="pill" id="modePill">מצב סריקה</div>
     </header>
@@ -159,23 +173,24 @@
         </div>
       </div>
 
-      <!-- scan view -->
+      <!-- scan -->
       <div class="bd" id="scanView">
         <div class="kpi">
           <div class="box"><p class="n" id="kCount">0</p><p class="t">מוצרים ברשימה</p></div>
           <div class="box"><p class="n" id="kSum">0</p><p class="t">סה״כ יחידות</p></div>
         </div>
 
-        <label>סריקה / הקלדה ידנית (לא חובה)</label>
-        <input id="manual" inputmode="numeric" placeholder="תסרוק… (או תקליד ברקוד) — לא צריך Enter" />
-        <div style="height:10px"></div>
+        <label>סריקה / הקלדה ידנית</label>
+        <input id="manual" inputmode="numeric" placeholder="תסרוק… או תקליד ברקוד (לא צריך Enter)" />
+        <div class="hint" style="margin-top:6px">טיפ: אם אתה על מסך אחר, הסורק עדיין יקלט — כל עוד אתה במצב סריקה.</div>
 
+        <div class="sep"></div>
         <div class="items" id="scanList"></div>
       </div>
 
-      <!-- review view -->
+      <!-- review (C2: כאן הסריקה כבויה) -->
       <div class="bd" id="reviewView" style="display:none">
-        <div class="hint" style="margin-bottom:10px">בחר מקור ויעד, בדוק רשימה (מכווצת) ואז שלח.</div>
+        <div class="hint" style="margin-bottom:10px">כאן הסריקה כבויה. אם צריך עוד מוצרים — לחץ “חזרה”.</div>
 
         <div class="row" style="margin-bottom:10px">
           <div>
@@ -205,96 +220,62 @@
         </div>
 
         <div class="items" id="reviewList"></div>
-
-        <details style="margin-top:10px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px 12px">
-          <summary style="cursor:pointer;font-weight:900">תצוגה מקדימה JSON</summary>
-          <pre id="jsonPrev" style="white-space:pre-wrap;word-break:break-word;margin:8px 0 0;background:#f8fafc;border:1px solid var(--line);padding:10px;border-radius:12px;font-size:12px"></pre>
-        </details>
       </div>
     </div>
   </div>
 
 <script>
-/* ===================== CONFIG (fill in) ===================== */
+/* ===================== CONFIG (שים ערכים אמיתיים) ===================== */
 const BASE = "https://flebwvluqixxuhrcmuxe.supabase.co";
-const RPC_TRANSFER = "/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
-const RPC_SNAPSHOT = "/rest/v1/rpc/get_product_snapshot_by_barcode";
+const RPC_TRANSFER  = "/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
+const RPC_SNAPSHOT  = "/rest/v1/rpc/get_product_snapshot_by_barcode";
 
-// מפתח המערכת שלך שנשלח בגוף: p_api_key
-const SYSTEM_API_KEY = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
-
-// Supabase headers (apikey + Authorization Bearer)
+const SYSTEM_API_KEY  = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
 const SUPABASE_APIKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA";
-const SUPABASE_BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA"; // בלי המילה "Bearer"
+const SUPABASE_BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA"; // בלי המילה Bearer
 
 /* ===================== STATE ===================== */
 const $ = (id)=>document.getElementById(id);
 let mode = "scan";
 let items = []; // {barcode, qty, note, snap?}
 const snapCache = new Map();
+let sinkTimer=null, manualTimer=null;
+let pendingBarcode=null, editIndex=null;
 
-// scan sink debounce
-let sinkTimer = null;
-let manualTimer = null;
+/* ===================== HELPERS ===================== */
+const norm = (s)=>String(s||"").trim();
+const isBarcode = (s)=>norm(s).length>=6;
+const esc = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const sumQty = ()=>items.reduce((a,x)=>a+(+x.qty||0),0);
+const whText = (wh)=> wh ? `אזור ${wh.zone ?? "—"} · מדף ${wh.shelf ?? "—"} · תא ${wh.bin ?? "—"}` : "—";
+const stockTotal = (snap)=> snap?.stock?.reduce ? snap.stock.reduce((a,x)=>a+(+x.qty||0),0) : null;
 
-// qty modal state
-let pendingBarcode = null;
-let editIndex = null;
-
-/* ===================== UI helpers ===================== */
 function toast(show, title="", desc="", ok=true){
-  const box = $("toastBox");
-  box.className = (show ? "show " : "") + (ok ? "ok" : "err");
+  const box=$("toastBox");
   box.style.display = show ? "flex" : "none";
-  $("tTitle").textContent = title;
-  $("tDesc").textContent = desc;
+  box.className = ok ? "ok" : "err";
+  $("tTitle").textContent=title;
+  $("tDesc").textContent=desc;
 }
+
 function setMode(m){
-  mode = m;
+  mode=m;
   $("modePill").textContent = (m==="scan") ? "מצב סריקה" : "מצב סיום";
   $("title").textContent = (m==="scan") ? "סריקה והוספת מוצרים" : "סקירה ושליחה";
   $("scanView").style.display = (m==="scan") ? "block" : "none";
   $("reviewView").style.display = (m==="scan") ? "none" : "block";
-  focusSink();
-  if(m==="review"){ renderReview(); refreshJson(); }
+  if(m==="scan") focusSink();
+  if(m==="review") { renderReview(); $("sendBtn").disabled = items.length===0; }
 }
-function sumQty(){ return items.reduce((a,x)=>a+(+x.qty||0),0); }
-function norm(s){ return String(s||"").trim(); }
-function isBarcode(s){ return norm(s).length >= 6; }
-function whText(wh){
-  if(!wh) return "—";
-  const z = wh.zone ?? "—", s = wh.shelf ?? "—", b = wh.bin ?? "—";
-  return `אזור ${z} · מדף ${s} · תא ${b}`;
-}
-function stockTotal(snap){
-  if(!snap || !Array.isArray(snap.stock)) return null;
-  return snap.stock.reduce((a,x)=>a+(+x.qty||0),0);
-}
-function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
 
-/* ===================== Scan sink (fixes your bug) ===================== */
 function focusSink(){
-  if($("qtyModal").classList.contains("show")) return;
-  if($("resModal").classList.contains("show")) return;
+  if(mode!=="scan") return;
+  if($("qtyMo").classList.contains("show")) return;
+  if($("resMo").classList.contains("show")) return;
   $("scanSink").focus();
 }
-function onSinkInput(){
-  const v = $("scanSink").value;
-  if(sinkTimer) clearTimeout(sinkTimer);
-  sinkTimer = setTimeout(()=>{
-    const code = norm(v);
-    $("scanSink").value = "";
-    if(isBarcode(code)) onScanned(code);
-  }, 80);
-}
-// keep focus even after clicks
-document.addEventListener("click", ()=>setTimeout(focusSink,0), true);
-document.addEventListener("focusin", (e)=>{
-  // אם נכנסים לשדה ידני/סלקט זה בסדר, אבל בסורק נרצה לחזור לפוקוס sink מיד אחרי
-  if(e.target && (e.target.id==="manual" || e.target.tagName==="SELECT")) setTimeout(focusSink,0);
-});
 
-/* ===================== Snapshot fetch ===================== */
+/* ===================== SUPABASE ===================== */
 function supaHeaders(){
   return {
     "Content-Type":"application/json",
@@ -302,32 +283,29 @@ function supaHeaders(){
     "Authorization":"Bearer " + SUPABASE_BEARER
   };
 }
+
+async function postJson(url, body){
+  const r = await fetch(url, {method:"POST", headers:supaHeaders(), body:JSON.stringify(body)});
+  const t = await r.text();
+  let j=null; try{ j = t ? JSON.parse(t) : null; } catch(e){}
+  if(!r.ok) throw {status:r.status, raw:t, json:j};
+  return j;
+}
+
 async function fetchSnapshot(barcode){
   const bc = norm(barcode);
   if(snapCache.has(bc)) return snapCache.get(bc);
 
-  const url = BASE + RPC_SNAPSHOT;
+  // לפי הדוגמה שלך: { "p_barcode": "..." }
+  const raw = await postJson(BASE + RPC_SNAPSHOT, { p_barcode: bc });
 
-  async function post(body){
-    const r = await fetch(url, {method:"POST", headers:supaHeaders(), body:JSON.stringify(body)});
-    const t = await r.text();
-    let j=null; try{j=t?JSON.parse(t):null}catch(e){}
-    if(!r.ok) throw {status:r.status, body:j||t};
-    return j;
-  }
-
-  // try common arg names (כדי שלא תיתקע אם RPC מצפה לשם שונה)
-  let raw;
-  try{ raw = await post({p_barcode: bc}); }
-  catch(_){ raw = await post({barcode: bc}); }
-
+  // normalize (תומך גם ב-wrapper כמו בדוגמה שלך)
   let data = raw;
   if(Array.isArray(raw) && raw.length){
     data = raw[0]?.data ? raw[0].data : raw[0];
   } else if(raw && raw.data){
     data = raw.data;
   }
-
   const d = data || {};
   const p = d.product || {};
   const snap = {
@@ -342,41 +320,57 @@ async function fetchSnapshot(barcode){
   return snap;
 }
 
-/* ===================== Flow ===================== */
-async function onScanned(barcode){
-  // תמיד נפתח מודאל מיד
+/* ===================== SCAN FLOW ===================== */
+function onScanned(barcode){
+  if(mode!=="scan") return; // C2: בסיום לא מקבלים סריקות
   openQty(barcode);
 }
+
+$("scanSink").addEventListener("input", ()=>{
+  if(mode!=="scan") { $("scanSink").value=""; return; }
+  const v = $("scanSink").value;
+  if(sinkTimer) clearTimeout(sinkTimer);
+  sinkTimer = setTimeout(()=>{
+    const code = norm(v);
+    $("scanSink").value = "";
+    if(isBarcode(code)) onScanned(code);
+  }, 70);
+});
+
+// לשמור פוקוס לסינק במצב סריקה
+document.addEventListener("click", ()=>setTimeout(focusSink,0), true);
+
+/* ===================== QTY MODAL ===================== */
 async function openQty(barcode, idx=null){
-  pendingBarcode = barcode;
+  pendingBarcode = norm(barcode);
   editIndex = idx;
 
-  // preload qty/note
+  // fill qty/note
   if(idx!=null){
     $("mQty").value = items[idx].qty || 1;
     $("mNote").value = items[idx].note || "";
   } else {
-    const ex = items.findIndex(x=>x.barcode===barcode);
-    if(ex>=0){ editIndex = ex; $("mQty").value = items[ex].qty || 1; $("mNote").value = items[ex].note || ""; }
+    const ex = items.findIndex(x=>x.barcode===pendingBarcode);
+    if(ex>=0){ editIndex=ex; $("mQty").value = items[ex].qty || 1; $("mNote").value = items[ex].note || ""; }
     else { $("mQty").value = 1; $("mNote").value = ""; }
   }
 
-  // show modal + loading snapshot ui
-  $("qtyModal").classList.add("show");
-  $("mBarcode").textContent = barcode;
+  // open modal + loading UI
+  $("qtyMo").classList.add("show");
+  $("mBarcode").textContent = pendingBarcode;
   $("snapName").textContent = "טוען פרטי מוצר…";
-  $("snapSkuTag").textContent = "מק״ט: —";
-  $("snapWhTag").textContent = "מחסן: —";
+  $("snapSku").textContent = "מק״ט: —";
+  $("snapWh").textContent  = "מחסן: —";
   $("snapStock").innerHTML = `<li class="hint">טוען…</li>`;
   $("snapErr").style.display = "none";
+  $("snapErr").textContent = "";
 
-  // fetch snapshot
   try{
-    const snap = await fetchSnapshot(barcode);
-    const name = snap.name_he ? snap.name_he + (snap.unit_he?` (${snap.unit_he})`:"") : "מוצר";
+    const snap = await fetchSnapshot(pendingBarcode);
+    const name = snap.name_he ? snap.name_he + (snap.unit_he ? ` (${snap.unit_he})` : "") : "מוצר";
     $("snapName").textContent = name;
-    $("snapSkuTag").textContent = "מק״ט: " + (snap.sku || "—");
-    $("snapWhTag").textContent = "מחסן: " + whText(snap.warehouse_location);
+    $("snapSku").textContent = "מק״ט: " + (snap.sku || "—");
+    $("snapWh").textContent  = "מחסן: " + whText(snap.warehouse_location);
 
     if(!snap.stock.length){
       $("snapStock").innerHTML = `<li class="hint">אין נתוני מלאי</li>`;
@@ -384,58 +378,62 @@ async function openQty(barcode, idx=null){
       $("snapStock").innerHTML = snap.stock.map(s=>{
         const loc = esc(s.location_name_he || s.location_code || "");
         const q = esc(String(s.qty ?? 0));
-        return `<li><span>${loc}</span><span class="mono" style="font-weight:900">${q}</span></li>`;
+        return `<li><span>${loc}</span><span class="mono" style="font-weight:1000">${q}</span></li>`;
       }).join("");
     }
-  }catch(_){
+  }catch(err){
+    // כאן אתה תקבל סוף סוף את השגיאה האמיתית מהשרת (כדי שתדע מה לא תקין)
+    const msg = [
+      "לא הצלחתי להביא פרטי מוצר. אפשר להמשיך בכל זאת.",
+      "",
+      "פרטי שגיאה:",
+      "HTTP " + (err?.status ?? "?"),
+      err?.json ? JSON.stringify(err.json, null, 2) : (err?.raw || String(err))
+    ].join("\n");
     $("snapErr").style.display = "block";
+    $("snapErr").textContent = msg;
+    $("snapName").textContent = "מוצר (לא נטען)";
   }
 
   setTimeout(()=>$("mQty").focus(), 10);
 }
+
 function closeQty(){
-  $("qtyModal").classList.remove("show");
-  pendingBarcode = null;
-  editIndex = null;
+  $("qtyMo").classList.remove("show");
+  pendingBarcode=null; editIndex=null;
   focusSink();
 }
 function stepQty(d){
-  const el = $("mQty");
-  let v = Math.max(1, (parseInt(el.value||"1",10)||1) + d);
-  el.value = v;
+  const el=$("mQty");
+  el.value = Math.max(1, (parseInt(el.value||"1",10)||1) + d);
 }
-async function confirmQty(){
+function confirmQty(){
   const bc = pendingBarcode;
   if(!bc) return;
+
   const qty = Math.max(1, parseInt($("mQty").value||"1",10)||1);
   const note = norm($("mNote").value);
-
-  // attach cached snapshot if exists (so list shows name/sku/stock)
-  const snap = snapCache.get(norm(bc)) || null;
+  const snap = snapCache.get(bc) || null;
 
   if(editIndex!=null){
-    items[editIndex].qty = qty;
-    items[editIndex].note = note;
-    if(snap) items[editIndex].snap = snap;
-  } else {
-    items.push({barcode: bc, qty, note, snap: snap || undefined});
+    items[editIndex].qty=qty; items[editIndex].note=note;
+    if(snap) items[editIndex].snap=snap;
+  }else{
+    items.push({barcode:bc, qty, note, snap: snap || undefined});
   }
 
   closeQty();
   renderScan();
 }
 
-/* ===================== Lists ===================== */
+/* ===================== LISTS ===================== */
 function renderScan(){
   $("kCount").textContent = items.length;
   $("kSum").textContent = sumQty();
   $("finishBtn").disabled = items.length===0;
 
-  const host = $("scanList");
-  if(!items.length){
-    host.innerHTML = `<div class="hint">עוד אין מוצרים. תסרוק.</div>`;
-    return;
-  }
+  const host=$("scanList");
+  if(!items.length){ host.innerHTML = `<div class="hint">עוד אין מוצרים. תסרוק.</div>`; return; }
 
   host.innerHTML = items.slice().reverse().map((it,rev)=>{
     const i = items.length-1-rev;
@@ -443,7 +441,7 @@ function renderScan(){
     const name = s?.name_he ? s.name_he + (s.unit_he?` (${s.unit_he})`:"") : "מוצר";
     const sku = s?.sku ? `מק״ט: ${esc(s.sku)} · ` : "";
     const tot = stockTotal(s);
-    const stockTag = (tot==null) ? `<span class="tag warn">אין נתונים</span>` : (tot<=0 ? `<span class="tag warn">אין מלאי</span>` : `<span class="tag">מלאי: ${esc(tot)}</span>`);
+    const st = (tot==null) ? `<span class="tag warn">אין נתונים</span>` : (tot<=0 ? `<span class="tag warn">אין מלאי</span>` : `<span class="tag">מלאי: ${esc(tot)}</span>`);
     return `
       <details>
         <summary>
@@ -453,7 +451,7 @@ function renderScan(){
           </div>
           <div class="row" style="flex:0 0 auto;gap:8px">
             <span class="tag">כמות: ${esc(it.qty)}</span>
-            ${stockTag}
+            ${st}
             <button class="btn" type="button" onclick="editItem(${i})">ערוך</button>
             <button class="btn bad" type="button" onclick="delItem(${i})">מחק</button>
           </div>
@@ -472,18 +470,17 @@ function renderScan(){
     `;
   }).join("");
 
-  // תמיד מכווץ
   host.querySelectorAll("details").forEach(d=>d.open=false);
 }
 
 function renderReview(){
-  const host = $("reviewList");
+  const host=$("reviewList");
   host.innerHTML = items.map((it,i)=>{
     const s = it.snap;
     const name = s?.name_he ? s.name_he + (s.unit_he?` (${s.unit_he})`:"") : "מוצר";
     const sku = s?.sku ? `מק״ט: ${esc(s.sku)} · ` : "";
     const tot = stockTotal(s);
-    const stockTag = (tot==null) ? `<span class="tag warn">אין נתונים</span>` : (tot<=0 ? `<span class="tag warn">אין מלאי</span>` : `<span class="tag">מלאי: ${esc(tot)}</span>`);
+    const st = (tot==null) ? `<span class="tag warn">אין נתונים</span>` : (tot<=0 ? `<span class="tag warn">אין מלאי</span>` : `<span class="tag">מלאי: ${esc(tot)}</span>`);
     return `
       <details>
         <summary>
@@ -494,7 +491,7 @@ function renderReview(){
           <div class="row" style="flex:0 0 auto;gap:8px">
             <span class="tag">#${i+1}</span>
             <span class="tag">כמות: ${esc(it.qty)}</span>
-            ${stockTag}
+            ${st}
             <button class="btn" type="button" onclick="editItem(${i})">ערוך</button>
             <button class="btn bad" type="button" onclick="delItem(${i})">מחק</button>
           </div>
@@ -517,85 +514,92 @@ function renderReview(){
 }
 
 function editItem(i){ openQty(items[i].barcode, i); }
-function delItem(i){ items.splice(i,1); renderScan(); if(mode==="review"){renderReview(); refreshJson();} }
-function updQty(i,v){ const n=Math.max(1,parseInt(v||"1",10)||1); items[i].qty=n; $("kSum").textContent=sumQty(); refreshJson(); }
-function updNote(i,v){ items[i].note=norm(v); refreshJson(); }
+function delItem(i){
+  items.splice(i,1);
+  renderScan();
+  if(mode==="review"){ renderReview(); }
+}
+function updQty(i,v){ items[i].qty = Math.max(1, parseInt(v||"1",10)||1); $("kSum").textContent=sumQty(); }
+function updNote(i,v){ items[i].note = norm(v); }
 
-function clearItems(){ items=[]; renderScan(); if(mode==="review"){renderReview(); refreshJson();} }
+/* ===================== NAV ===================== */
+function clearItems(){ items=[]; renderScan(); if(mode==="review") renderReview(); }
 function toReview(){ if(!items.length) return; setMode("review"); }
-function toScan(){ setMode("scan"); renderScan(); }
+function toScan(){ setMode("scan"); renderScan(); focusSink(); }
 
-/* ===================== Send ===================== */
+/* ===================== SEND ===================== */
 function payload(){
-  const fromLoc = $("fromLoc").value;
-  const toLoc = $("toLoc").value;
+  const fromLoc=$("fromLoc").value, toLoc=$("toLoc").value;
   return {
     p_items: items.map(it=>({
-      p_qty: +it.qty,
-      p_source: "api",
-      p_barcode: it.barcode,
-      p_note_he: it.note || "",
-      p_allow_negative: false,
-      p_to_location_code: toLoc,
-      p_from_location_code: fromLoc
+      p_qty:+it.qty,
+      p_source:"api",
+      p_barcode:it.barcode,
+      p_note_he:it.note||"",
+      p_allow_negative:false,
+      p_to_location_code:toLoc,
+      p_from_location_code:fromLoc
     })),
     p_api_key: SYSTEM_API_KEY
   };
 }
-function refreshJson(){ $("jsonPrev").textContent = JSON.stringify(payload(), null, 2); }
 
 async function sendAll(){
   toast(false);
+
   if(!items.length) return;
+  if(SYSTEM_API_KEY.includes("PUT_")) return toast(true,"חסר SYSTEM_API_KEY","שים את מפתח המערכת בתוך הקוד.",false);
+  if(SUPABASE_APIKEY.includes("PUT_")) return toast(true,"חסר apikey","שים apikey בתוך הקוד.",false);
+  if(SUPABASE_BEARER.includes("PUT_")) return toast(true,"חסר Authorization token","שים bearer token בתוך הקוד.",false);
 
-  if(!SYSTEM_API_KEY || SYSTEM_API_KEY.includes("PUT_")) return toast(true,"חסר SYSTEM_API_KEY","שים את מפתח המערכת בתוך הקוד.",false);
-  if(!SUPABASE_APIKEY || SUPABASE_APIKEY.includes("PUT_")) return toast(true,"חסר SUPABASE apikey","שים apikey בתוך הקוד.",false);
-  if(!SUPABASE_BEARER || SUPABASE_BEARER.includes("PUT_")) return toast(true,"חסר Authorization token","שים bearer token בתוך הקוד.",false);
-
-  $("sendBtn").disabled = true; $("sendBtn").textContent = "שולח...";
+  $("sendBtn").disabled=true; $("sendBtn").textContent="שולח...";
   try{
-    const r = await fetch(BASE + RPC_TRANSFER, {method:"POST", headers:supaHeaders(), body:JSON.stringify(payload())});
-    const t = await r.text();
-    let j=null; try{j=t?JSON.parse(t):null}catch(e){}
-    if(r.ok){
-      showRes(true, "הצלחה ✅", (j?JSON.stringify(j,null,2):t||"(ריק)"));
-    } else {
-      showRes(false, "שגיאה ❌", (j?JSON.stringify(j,null,2):t||("HTTP "+r.status)));
-    }
-  } catch(err){
+    const res = await fetch(BASE + RPC_TRANSFER, {method:"POST", headers:supaHeaders(), body:JSON.stringify(payload())});
+    const t = await res.text();
+    let j=null; try{ j=t?JSON.parse(t):null }catch(e){}
+    if(res.ok) showRes(true,"הצלחה ✅", j?JSON.stringify(j,null,2):(t||"(ריק)"));
+    else showRes(false,"שגיאה ❌", j?JSON.stringify(j,null,2):(t||("HTTP "+res.status)));
+  }catch(err){
     showRes(false,"שגיאה ❌",String(err));
-  } finally {
-    $("sendBtn").disabled = false; $("sendBtn").textContent = "שלח";
+  }finally{
+    $("sendBtn").disabled=false; $("sendBtn").textContent="שלח";
   }
 }
 
-function showRes(ok, title, body){
-  $("rTitle").textContent = title;
-  $("rBody").textContent = body;
-  $("rBtn").className = "btn " + (ok ? "ok" : "");
-  $("rBtn").textContent = ok ? "חזרה להתחלה" : "חזרה לרשימה";
-  $("rBtn").onclick = ok ? resetAll : ()=>{ closeRes(); setMode("review"); };
-  $("resModal").classList.add("show");
+function showRes(ok,title,body){
+  $("rTitle").textContent=title;
+  $("rBody").textContent=body;
+  $("resMo").classList.add("show");
+  const btn=$("rBtn");
+  btn.textContent = ok ? "חזרה להתחלה" : "חזרה לרשימה";
+  btn.className = "btn " + (ok ? "ok" : "");
+  btn.onclick = ok ? resetAll : ()=>{ closeRes(); setMode("review"); };
 }
-function closeRes(){ $("resModal").classList.remove("show"); focusSink(); }
+function closeRes(){ $("resMo").classList.remove("show"); }
 function resetAll(){
-  closeRes();
-  items = [];
-  $("fromLoc").value = "WAREHOUSE";
-  $("toLoc").value = "PICKING";
+  $("resMo").classList.remove("show");
+  items=[];
+  $("fromLoc").value="WAREHOUSE";
+  $("toLoc").value="PICKING";
   setMode("scan");
   renderScan();
+  focusSink();
 }
 
-/* ===================== Manual input ===================== */
+/* ===================== MANUAL INPUT (A1) ===================== */
 $("manual").addEventListener("input", ()=>{
+  if(mode!=="scan") return;
   const v = $("manual").value;
   if(manualTimer) clearTimeout(manualTimer);
-  manualTimer = setTimeout(()=>{ if(isBarcode(v)) { $("manual").value=""; onScanned(v); } }, 180);
+  manualTimer = setTimeout(()=>{
+    if(isBarcode(v)){
+      $("manual").value="";
+      onScanned(v);
+    }
+  }, 180);
 });
 
-/* ===================== Sink events + init ===================== */
-$("scanSink").addEventListener("input", onSinkInput);
+/* ===================== INIT ===================== */
 setMode("scan");
 renderScan();
 setTimeout(focusSink, 0);
