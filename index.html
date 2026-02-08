@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>העברת מלאי לפי ברקוד</title>
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --primary:#2563eb;
+      --primary-2:#1d4ed8;
+      --danger:#dc2626;
+      --success:#16a34a;
+      --shadow: 0 10px 30px rgba(2,6,23,.08);
+      --radius:18px;
+      --focus: 0 0 0 4px rgba(37,99,235,.15);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg, #ffffff 0%, var(--bg) 60%, #eef2ff 100%);
+      color:var(--text);
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:18px}
+    header{
+      display:flex;gap:14px;align-items:center;justify-content:space-between;
+      margin:10px 0 16px;
+    }
+    .brand{
+      display:flex;flex-direction:column;gap:4px;
+    }
+    .brand h1{
+      margin:0;font-size:20px;letter-spacing:.2px;
+    }
+    .brand p{
+      margin:0;color:var(--muted);font-size:13px;
+    }
+    .pill{
+      font-size:12px;color:var(--muted);
+      border:1px solid var(--line);background:#fff;border-radius:999px;
+      padding:8px 10px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+    }
+    @media (max-width: 860px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:linear-gradient(180deg,#ffffff, #f8fafc);
+    }
+    .card .hd h2{margin:0;font-size:15px}
+    .card .bd{padding:16px}
+    .hint{color:var(--muted);font-size:13px;line-height:1.4}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .row > *{flex:1}
+    .row .fit{flex:0 0 auto}
+    label{display:block;font-size:13px;margin:0 0 6px;color:#334155}
+    input, select, textarea{
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      font-size:14px;
+      outline:none;
+      transition:.15s;
+    }
+    textarea{min-height:90px;resize:vertical}
+    input:focus, select:focus, textarea:focus{box-shadow:var(--focus);border-color:#93c5fd}
+    .btn{
+      appearance:none;border:0;cursor:pointer;
+      padding:11px 14px;border-radius:14px;
+      font-weight:700;font-size:14px;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      transition:.15s;
+      user-select:none;
+    }
+    .btn.primary{background:var(--primary);color:#fff}
+    .btn.primary:hover{background:var(--primary-2)}
+    .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+    .btn.ghost:hover{background:#f8fafc}
+    .btn.danger{background:#fff;border:1px solid rgba(220,38,38,.25);color:var(--danger)}
+    .btn.danger:hover{background:rgba(220,38,38,.06)}
+    .btn.success{background:var(--success);color:#fff}
+    .btn.success:hover{filter:brightness(.95)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    .kpi{
+      display:flex;gap:10px;flex-wrap:wrap;
+    }
+    .kpi .box{
+      flex:1;
+      min-width:160px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:linear-gradient(180deg, #fff, #f8fafc);
+    }
+    .kpi .box .n{font-size:22px;font-weight:800;margin:0}
+    .kpi .box .t{margin:3px 0 0;color:var(--muted);font-size:12px}
+
+    .items{
+      display:flex;flex-direction:column;gap:10px;
+    }
+    details.item{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      overflow:hidden;
+    }
+    details.item summary{
+      list-style:none;
+      cursor:pointer;
+      padding:12px 12px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    details.item summary::-webkit-details-marker{display:none}
+    .itemTop{
+      display:flex;gap:10px;align-items:center;min-width:0;flex:1;
+    }
+    .badge{
+      font-size:12px;
+      background:#eef2ff;
+      color:#3730a3;
+      border:1px solid #c7d2fe;
+      border-radius:999px;
+      padding:6px 10px;
+      white-space:nowrap;
+    }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12.5px;
+      color:#0f172a;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .itemBody{
+      border-top:1px solid var(--line);
+      padding:12px;
+      background:#f8fafc;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 640px){
+      .itemBody{grid-template-columns:1fr}
+    }
+    .rightActions{display:flex;gap:8px;align-items:center}
+    .mutedSmall{color:var(--muted);font-size:12px}
+
+    .toast{
+      position:fixed;
+      top:16px;
+      left:16px;
+      right:16px;
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+      z-index:9999;
+    }
+    .toast .msg{
+      pointer-events:auto;
+      max-width:980px;
+      width:100%;
+      border-radius:16px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow:var(--shadow);
+      display:none;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .toast .msg.show{display:flex}
+    .toast .msg.ok{border-color: rgba(22,163,74,.35)}
+    .toast .msg.err{border-color: rgba(220,38,38,.35)}
+    .toast .title{font-weight:800}
+    .toast .desc{color:var(--muted);font-size:13px;margin-top:2px;white-space:pre-wrap}
+    .toast .x{margin-inline-start:auto}
+
+    .modalOverlay{
+      position:fixed; inset:0;
+      background:rgba(2,6,23,.45);
+      display:none;
+      align-items:center;justify-content:center;
+      padding:18px;
+      z-index:9998;
+    }
+    .modalOverlay.show{display:flex}
+    .modal{
+      width:min(520px, 100%);
+      background:#fff;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+      overflow:hidden;
+    }
+    .modal .mhd{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:linear-gradient(180deg,#ffffff, #f8fafc);
+    }
+    .modal .mhd h3{margin:0;font-size:15px}
+    .modal .mbd{padding:16px}
+    .qtyPicker{
+      display:flex;gap:10px;align-items:center;justify-content:center;
+      padding:10px 0 2px;
+    }
+    .qtyBtn{
+      width:44px;height:44px;border-radius:14px;
+      border:1px solid var(--line);background:#fff;cursor:pointer;
+      font-size:20px;font-weight:900;
+    }
+    .qtyBtn:hover{background:#f8fafc}
+    .qtyInput{
+      width:120px;
+      text-align:center;
+      font-size:18px;font-weight:800;
+    }
+    .split{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    }
+    @media (max-width: 520px){
+      .split{grid-template-columns:1fr}
+    }
+    .footerBar{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end;
+      padding:14px 16px;border-top:1px solid var(--line);
+      background:#fff;
+    }
+    .divider{height:1px;background:var(--line);margin:12px 0}
+    .smallNote{font-size:12px;color:var(--muted);line-height:1.35}
+    .hidden{display:none !important;}
+  </style>
+</head>
+<body>
+  <div class="toast">
+    <div id="toast" class="msg">
+      <div>
+        <div id="toastTitle" class="title"></div>
+        <div id="toastDesc" class="desc"></div>
+      </div>
+      <button class="btn ghost x" onclick="hideToast()">סגור</button>
+    </div>
+  </div>
+
+  <div class="modalOverlay" id="qtyModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="mhd">
+        <h3>בחר כמות</h3>
+        <button class="btn ghost" onclick="closeQtyModal()">ביטול</button>
+      </div>
+      <div class="mbd">
+        <div class="hint" style="margin-bottom:10px">
+          ברקוד: <span id="mBarcode" class="mono"></span>
+        </div>
+
+        <div class="qtyPicker">
+          <button class="qtyBtn" onclick="stepQty(-1)" aria-label="הפחת">−</button>
+          <input id="mQty" class="qtyInput" type="number" inputmode="numeric" min="1" step="1" value="1" />
+          <button class="qtyBtn" onclick="stepQty(1)" aria-label="הוסף">+</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <label for="mItemNote">הערה לפריט (אופציונלי)</label>
+        <input id="mItemNote" type="text" placeholder="לדוגמה: העברה 1" />
+
+        <div class="smallNote" style="margin-top:10px">
+          טיפ: אם תסרוק אותו ברקוד שוב – המערכת תפתח שוב בחירת כמות ותעדכן את הפריט הקיים (לא תיצור כפילות).
+        </div>
+      </div>
+      <div class="footerBar">
+        <button class="btn primary" onclick="confirmQty()">אישור</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modalOverlay" id="resultModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="mhd">
+        <h3 id="resultTitle">סטטוס</h3>
+        <button class="btn ghost" onclick="closeResultModal()">סגור</button>
+      </div>
+      <div class="mbd">
+        <div id="resultBody" class="hint"></div>
+      </div>
+      <div class="footerBar">
+        <button id="resultPrimaryBtn" class="btn success" onclick="resetToStart()">חזרה להתחלה</button>
+        <button id="resultSecondaryBtn" class="btn ghost hidden" onclick="closeResultModal()">חזרה לרשימה</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>העברת מלאי לפי ברקוד</h1>
+        <p>סורקים → בוחרים כמות מיד → מסיימים ושולחים הכל בפעם אחת</p>
+      </div>
+      <div class="pill" id="scannerState">מצב סריקה פעיל</div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: main -->
+      <div class="card" id="scanCard">
+        <div class="hd">
+          <h2 id="mainTitle">סריקה והוספת מוצרים</h2>
+          <div class="rightActions">
+            <button class="btn ghost" id="finishBtn" onclick="goToReview()" disabled>סיום</button>
+            <button class="btn danger" onclick="clearItems()" title="מוחק את כל הפריטים">נקה</button>
+          </div>
+        </div>
+
+        <div class="bd" id="scanSection">
+          <div class="kpi" style="margin-bottom:12px">
+            <div class="box">
+              <p class="n" id="kpiCount">0</p>
+              <p class="t">מוצרים ברשימה</p>
+            </div>
+            <div class="box">
+              <p class="n" id="kpiSum">0</p>
+              <p class="t">סה״כ יחידות</p>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;border-radius:16px;">
+            <div class="bd">
+              <label for="manualBarcode">סריקה / הקלדה ידנית (אופציונלי)</label>
+              <input id="manualBarcode" autocomplete="off" inputmode="numeric" placeholder="תסרוק עכשיו… (או תקליד ברקוד)" />
+              <div class="hint" style="margin-top:8px">
+                המערכת תקלוט אוטומטית אחרי “עצירה קצרה” בהקלדה/סריקה — לא צריך Enter.
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="hint" style="margin-bottom:10px">
+            <b>מה קורה כשסורקים?</b> מיד ייפתח חלון בחירת כמות. לאחר אישור, הפריט נכנס לרשימה.
+          </div>
+
+          <div id="scanItemsPreview" class="items"></div>
+        </div>
+
+        <div class="bd hidden" id="reviewSection">
+          <div class="hint" style="margin-bottom:12px">
+            בדוק את הרשימה, בחר מיקום מקור ויעד, הוסף הערות אם צריך — ואז שלח.
+          </div>
+
+          <div class="split" style="margin-bottom:10px">
+            <div>
+              <label for="fromLoc">מיקום נוכחי (מקור)</label>
+              <select id="fromLoc">
+                <option value="PICKING">ליקוט (PICKING)</option>
+                <option value="STORE">חנות (STORE)</option>
+                <option value="WAREHOUSE" selected>מחסן (WAREHOUSE)</option>
+              </select>
+            </div>
+            <div>
+              <label for="toLoc">יעד</label>
+              <select id="toLoc">
+                <option value="PICKING" selected>ליקוט (PICKING)</option>
+                <option value="STORE">חנות (STORE)</option>
+                <option value="WAREHOUSE">מחסן (WAREHOUSE)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="split" style="margin-bottom:10px">
+            <div>
+              <label for="apiKey">מפתח מערכת (p_api_key)</label>
+              <input id="apiKey" type="password" placeholder="686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba" />
+              <div class="smallNote" style="margin-top:6px">נשלח בתוך ה-JSON תחת p_api_key.</div>
+            </div>
+            <div>
+              <label for="allowNeg" style="margin-bottom:10px;">אופציות</label>
+              <div class="row" style="gap:10px">
+                <div class="fit" style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);padding:10px 12px;border-radius:14px;background:#fff;">
+                  <input id="allowNeg" type="checkbox" style="width:18px;height:18px;margin:0" />
+                  <div>
+                    <div style="font-weight:800;font-size:13px">לאפשר מלאי שלילי</div>
+                    <div class="mutedSmall">p_allow_negative</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <label for="globalNote">הערות (אופציונלי)</label>
+          <textarea id="globalNote" placeholder="הערה כללית שתישלח לכל הפריטים שאין להם הערה ספציפית..."></textarea>
+
+          <div class="divider"></div>
+
+          <div class="hd" style="border:1px solid var(--line);border-radius:16px;margin-bottom:10px">
+            <h2 style="font-size:14px;margin:0">רשימת מוצרים לשליחה</h2>
+            <div class="rightActions">
+              <button class="btn ghost" onclick="backToScan()">חזרה לסריקה</button>
+              <button class="btn primary" id="sendBtn" onclick="sendAll()" disabled>שלח</button>
+            </div>
+          </div>
+
+          <div id="reviewItems" class="items"></div>
+
+          <div class="divider"></div>
+          <details style="border:1px solid var(--line);border-radius:16px;background:#fff;padding:8px 12px">
+            <summary style="cursor:pointer;font-weight:800">תצוגה מקדימה של ה-JSON שיישלח</summary>
+            <pre id="jsonPreview" style="white-space:pre-wrap;word-break:break-word;margin:10px 0 8px;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:14px;font-size:12px"></pre>
+          </details>
+        </div>
+      </div>
+
+      <!-- Right: info / tips -->
+      <div class="card">
+        <div class="hd">
+          <h2>הוראות קצרות</h2>
+          <span class="badge">עיצוב בהיר</span>
+        </div>
+        <div class="bd">
+          <ol class="hint" style="margin:0;padding-inline-start:18px">
+            <li>סורקים ברקוד (או מקלידים) — בלי Enter.</li>
+            <li>נפתח חלון כמות מיד — מאשרים.</li>
+            <li>סורקים עוד מוצר…</li>
+            <li>לוחצים <b>סיום</b> → בוחרים מקור/יעד → <b>שלח</b>.</li>
+          </ol>
+
+          <div class="divider"></div>
+
+          <div class="hint">
+            <b>הערות:</b><br/>
+            • אפשר לערוך כמות והערה לכל פריט ברשימה.<br/>
+            • אם אין הערה לפריט — תישלח ההערה הכללית (אם כתבת).<br/>
+            • אם אין הערה כללית — יישלח מחרוזת ריקה.
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="hint">
+            <b>ה-API:</b><br/>
+            POST לכתובת Supabase RPC כפי שביקשת, עם גוף JSON הכולל את כל הפריטים יחד.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ========= CONFIG =========
+  const API_URL = "https://flebwvluqixxuhrcmuxe.supabase.co/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
+
+  // ========= STATE =========
+  /** @type {{barcode:string, qty:number, note_he:string}[]} */
+  let items = [];
+  let currentMode = "scan"; // "scan" | "review"
+
+  // For scan detection
+  let scanBuffer = "";
+  let scanTimer = null;
+
+  // For manual input debounce
+  let manualTimer = null;
+
+  // For qty modal
+  let pendingBarcode = null;
+  let editingIndex = null; // null = new or merge, number = edit existing
+
+  // ========= UTIL =========
+  const $ = (id) => document.getElementById(id);
+
+  function sumQty(){
+    return items.reduce((a,b)=>a + (Number(b.qty)||0), 0);
+  }
+
+  function showToast(type, title, desc){
+    const t = $("toast");
+    t.className = "msg show " + (type === "ok" ? "ok" : "err");
+    $("toastTitle").textContent = title;
+    $("toastDesc").textContent = desc || "";
+  }
+  function hideToast(){
+    $("toast").className = "msg";
+  }
+
+  function setMode(mode){
+    currentMode = mode;
+    const scan = $("scanSection");
+    const rev  = $("reviewSection");
+    $("scannerState").textContent = mode === "scan" ? "מצב סריקה פעיל" : "מצב סקירה ושליחה";
+
+    if(mode === "scan"){
+      scan.classList.remove("hidden");
+      rev.classList.add("hidden");
+      $("mainTitle").textContent = "סריקה והוספת מוצרים";
+      $("manualBarcode").focus();
+    }else{
+      scan.classList.add("hidden");
+      rev.classList.remove("hidden");
+      $("mainTitle").textContent = "סקירה ושליחה";
+      renderReview();
+      refreshJsonPreview();
+    }
+  }
+
+  function normalizeBarcode(s){
+    return String(s || "").trim();
+  }
+
+  function isLikelyBarcode(s){
+    // ברקוד לרוב מספרי ודי ארוך; תומך גם אלפאנומרי אם צריך
+    const v = normalizeBarcode(s);
+    if(v.length < 6) return false;
+    return true;
+  }
+
+  function openQtyModal(barcode, indexToEdit=null){
+    pendingBarcode = barcode;
+    editingIndex = indexToEdit;
+
+    $("mBarcode").textContent = barcode;
+
+    // אם עריכה/קיים -> להציג הכמות הנוכחית
+    if(indexToEdit !== null){
+      $("mQty").value = String(items[indexToEdit].qty ?? 1);
+      $("mItemNote").value = items[indexToEdit].note_he ?? "";
+    }else{
+      // אם קיים פריט באותו ברקוד — עריכה/עדכון במקום כפילות
+      const existingIdx = items.findIndex(x => x.barcode === barcode);
+      if(existingIdx !== -1){
+        editingIndex = existingIdx;
+        $("mQty").value = String(items[existingIdx].qty ?? 1);
+        $("mItemNote").value = items[existingIdx].note_he ?? "";
+      }else{
+        $("mQty").value = "1";
+        $("mItemNote").value = "";
+      }
+    }
+
+    $("qtyModal").classList.add("show");
+    setTimeout(()=> $("mQty").focus(), 50);
+  }
+
+  function closeQtyModal(){
+    $("qtyModal").classList.remove("show");
+    pendingBarcode = null;
+    editingIndex = null;
+    $("manualBarcode").value = "";
+    $("manualBarcode").focus();
+  }
+
+  function stepQty(delta){
+    const el = $("mQty");
+    let v = Number(el.value || 0);
+    v = isFinite(v) ? v : 0;
+    v = Math.max(1, v + delta);
+    el.value = String(v);
+  }
+
+  function confirmQty(){
+    const bc = pendingBarcode;
+    if(!bc) return;
+
+    let qty = Number($("mQty").value);
+    if(!isFinite(qty) || qty < 1){
+      showToast("err", "כמות לא תקינה", "בחר כמות של 1 ומעלה.");
+      $("mQty").focus();
+      return;
+    }
+    qty = Math.floor(qty);
+
+    const note = String($("mItemNote").value || "").trim();
+
+    if(editingIndex !== null){
+      items[editingIndex].qty = qty;
+      items[editingIndex].note_he = note;
+    }else{
+      items.push({ barcode: bc, qty, note_he: note });
+    }
+
+    closeQtyModal();
+    renderScanPreview();
+  }
+
+  function clearItems(){
+    items = [];
+    renderScanPreview();
+    if(currentMode === "review"){
+      renderReview();
+      refreshJsonPreview();
+    }
+  }
+
+  function deleteItem(index){
+    items.splice(index, 1);
+    renderScanPreview();
+    if(currentMode === "review"){
+      renderReview();
+      refreshJsonPreview();
+    }
+  }
+
+  function renderScanPreview(){
+    $("kpiCount").textContent = String(items.length);
+    $("kpiSum").textContent = String(sumQty());
+
+    $("finishBtn").disabled = items.length === 0;
+
+    const host = $("scanItemsPreview");
+    host.innerHTML = "";
+    if(items.length === 0){
+      host.innerHTML = `<div class="hint">עוד אין מוצרים. תתחיל לסרוק.</div>`;
+      return;
+    }
+
+    items.slice().reverse().forEach((it, revIdx)=>{
+      const idx = items.length - 1 - revIdx;
+      const d = document.createElement("details");
+      d.className = "item";
+      d.open = revIdx < 2; // פותח 2 אחרונים
+      d.innerHTML = `
+        <summary>
+          <div class="itemTop">
+            <span class="badge">כמות: ${escapeHtml(String(it.qty))}</span>
+            <span class="mono" title="${escapeHtml(it.barcode)}">${escapeHtml(it.barcode)}</span>
+          </div>
+          <div class="rightActions">
+            <button class="btn ghost" type="button" onclick="editItem(${idx})">ערוך</button>
+            <button class="btn danger" type="button" onclick="deleteItem(${idx})">מחק</button>
+          </div>
+        </summary>
+        <div class="itemBody">
+          <div>
+            <label>ברקוד</label>
+            <input value="${escapeAttr(it.barcode)}" disabled />
+          </div>
+          <div>
+            <label>הערה לפריט</label>
+            <input value="${escapeAttr(it.note_he || "")}" disabled />
+          </div>
+        </div>
+      `;
+      host.appendChild(d);
+    });
+  }
+
+  function editItem(index){
+    const it = items[index];
+    openQtyModal(it.barcode, index);
+  }
+
+  function goToReview(){
+    if(items.length === 0) return;
+    setMode("review");
+  }
+  function backToScan(){
+    setMode("scan");
+  }
+
+  function buildPayload(){
+    const fromLoc = $("fromLoc").value;
+    const toLoc   = $("toLoc").value;
+    const allowNeg = $("allowNeg").checked;
+    const globalNote = String($("globalNote").value || "").trim();
+    const apiKey = String($("apiKey").value || "").trim();
+
+    const p_items = items.map(it => ({
+      p_qty: Number(it.qty),
+      p_source: "api",
+      p_barcode: it.barcode,
+      p_note_he: (String(it.note_he || "").trim() || globalNote || ""),
+      p_allow_negative: !!allowNeg,
+      p_to_location_code: toLoc,
+      p_from_location_code: fromLoc
+    }));
+
+    return { p_items, p_api_key: apiKey };
+  }
+
+  function refreshJsonPreview(){
+    const payload = buildPayload();
+    $("jsonPreview").textContent = JSON.stringify(payload, null, 2);
+    $("sendBtn").disabled = items.length === 0;
+  }
+
+  function renderReview(){
+    refreshJsonPreview();
+
+    const host = $("reviewItems");
+    host.innerHTML = "";
+    if(items.length === 0){
+      host.innerHTML = `<div class="hint">אין מוצרים לשליחה. חזור לסריקה.</div>`;
+      $("sendBtn").disabled = true;
+      return;
+    }
+
+    items.forEach((it, idx)=>{
+      const d = document.createElement("details");
+      d.className = "item";
+      d.open = false;
+      d.innerHTML = `
+        <summary>
+          <div class="itemTop">
+            <span class="badge">#${idx+1}</span>
+            <span class="badge">כמות: ${escapeHtml(String(it.qty))}</span>
+            <span class="mono" title="${escapeHtml(it.barcode)}">${escapeHtml(it.barcode)}</span>
+          </div>
+          <div class="rightActions">
+            <button class="btn ghost" type="button" onclick="editItemFromReview(${idx})">ערוך</button>
+            <button class="btn danger" type="button" onclick="deleteItem(${idx})">מחק</button>
+          </div>
+        </summary>
+        <div class="itemBody">
+          <div>
+            <label>כמות</label>
+            <input type="number" min="1" step="1" value="${escapeAttr(String(it.qty))}"
+              oninput="updateQtyInline(${idx}, this.value)" />
+          </div>
+          <div>
+            <label>הערה לפריט (אופציונלי)</label>
+            <input value="${escapeAttr(it.note_he || "")}"
+              oninput="updateNoteInline(${idx}, this.value)" />
+          </div>
+        </div>
+      `;
+      host.appendChild(d);
+    });
+  }
+
+  function editItemFromReview(index){
+    editItem(index);
+  }
+
+  function updateQtyInline(index, v){
+    let n = Number(v);
+    if(!isFinite(n) || n < 1) return;
+    items[index].qty = Math.floor(n);
+    $("kpiCount").textContent = String(items.length);
+    $("kpiSum").textContent = String(sumQty());
+    refreshJsonPreview();
+  }
+  function updateNoteInline(index, v){
+    items[index].note_he = String(v || "");
+    refreshJsonPreview();
+  }
+
+  async function sendAll(){
+    hideToast();
+
+    const payload = buildPayload();
+    if(!payload.p_api_key){
+      showToast("err", "חסר מפתח מערכת", "מלא את השדה p_api_key כדי לשלוח.");
+      $("apiKey").focus();
+      return;
+    }
+    if(payload.p_items.length === 0){
+      showToast("err", "אין פריטים", "תוסיף לפחות פריט אחד.");
+      return;
+    }
+
+    $("sendBtn").disabled = true;
+    $("sendBtn").textContent = "שולח...";
+
+    try{
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json"
+          // אם אצלך Supabase דורש apikey/Authorization,
+          // תוסיף כאן headers בהתאם (apikey / Authorization Bearer).
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch(e){ /* keep text */ }
+
+      if(res.ok){
+        openResultModal(true, "הצלחה ✅", "הפעולה בוצעה בהצלחה.\n\nתגובה מהשרת:\n" + (data ? JSON.stringify(data, null, 2) : (text || "(ריק)")));
+      }else{
+        const errMsg =
+          (data && (data.message || data.error || data.details)) ?
+            JSON.stringify(data, null, 2) :
+            (text || `HTTP ${res.status}`);
+
+        openResultModal(false, "שגיאה ❌", "הייתה שגיאה בביצוע הפעולה.\n\nפרטים:\n" + errMsg);
+      }
+    }catch(err){
+      openResultModal(false, "שגיאה ❌", "קרתה שגיאה (רשת/דפדפן):\n" + String(err));
+    }finally{
+      $("sendBtn").disabled = false;
+      $("sendBtn").textContent = "שלח";
+    }
+  }
+
+  function openResultModal(ok, title, body){
+    $("resultTitle").textContent = title;
+    $("resultBody").textContent = body;
+
+    const primary = $("resultPrimaryBtn");
+    const secondary = $("resultSecondaryBtn");
+
+    if(ok){
+      primary.className = "btn success";
+      primary.textContent = "חזרה להתחלה";
+      secondary.classList.add("hidden");
+    }else{
+      primary.className = "btn ghost";
+      primary.textContent = "חזרה לרשימה";
+      secondary.classList.add("hidden");
+      // במצב שגיאה — חוזרים לרשימה, לא מוחקים
+      primary.onclick = () => { closeResultModal(); setMode("review"); };
+    }
+
+    $("resultModal").classList.add("show");
+  }
+
+  function closeResultModal(){
+    $("resultModal").classList.remove("show");
+  }
+
+  function resetToStart(){
+    closeResultModal();
+    clearItems();
+    $("globalNote").value = "";
+    $("apiKey").value = "";
+    $("allowNeg").checked = false;
+    $("fromLoc").value = "WAREHOUSE";
+    $("toLoc").value = "PICKING";
+    setMode("scan");
+  }
+
+  // ========= SCAN CAPTURE (NO ENTER REQUIRED) =========
+  // Strategy:
+  // 1) Capture global keydown. Scanners send characters fast.
+  // 2) When we detect a pause (e.g. 180ms) we treat buffer as a scan.
+  // 3) Also support manual input field with debounce.
+  function onPotentialScanString(str){
+    const bc = normalizeBarcode(str);
+    if(!isLikelyBarcode(bc)) return;
+
+    // clear inputs/buffer
+    scanBuffer = "";
+    $("manualBarcode").value = "";
+
+    openQtyModal(bc);
+  }
+
+  function handleGlobalKeydown(e){
+    // Ignore if user is typing in textarea/password etc. except manualBarcode
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+    const isTypingField = ["input","textarea","select"].includes(tag);
+    const isManual = e.target === $("manualBarcode");
+
+    // still allow scan into manual input naturally
+    if(isTypingField && !isManual) return;
+
+    // accept printable chars
+    if(e.key && e.key.length === 1){
+      scanBuffer += e.key;
+
+      if(scanTimer) clearTimeout(scanTimer);
+      scanTimer = setTimeout(()=>{
+        const candidate = scanBuffer;
+        scanBuffer = "";
+        onPotentialScanString(candidate);
+      }, 180);
+    } else {
+      // ignore non-printables (Enter not needed)
+    }
+  }
+
+  function handleManualInput(){
+    const v = $("manualBarcode").value;
+    if(manualTimer) clearTimeout(manualTimer);
+    manualTimer = setTimeout(()=>{
+      if(isLikelyBarcode(v)){
+        onPotentialScanString(v);
+      }
+    }, 220);
+  }
+
+  // ========= SAFE HTML =========
+  function escapeHtml(s){
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+  function escapeAttr(s){
+    return escapeHtml(s).replaceAll("'","&#39;");
+  }
+
+  // ========= INIT =========
+  window.addEventListener("keydown", handleGlobalKeydown);
+  $("manualBarcode").addEventListener("input", handleManualInput);
+
+  // review changes update JSON preview
+  ["fromLoc","toLoc","globalNote","apiKey","allowNeg"].forEach(id=>{
+    $(id).addEventListener("input", ()=>{
+      if(currentMode === "review") refreshJsonPreview();
+    });
+    $(id).addEventListener("change", ()=>{
+      if(currentMode === "review") refreshJsonPreview();
+    });
+  });
+
+  renderScanPreview();
+  setMode("scan");
+</script>
+</body>
+</html>
