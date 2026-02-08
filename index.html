@@ -16,14 +16,14 @@
     header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin:6px 0 12px}
     h1{margin:0;font-size:18px}
     .sub{margin:4px 0 0;color:var(--mut);font-size:13px}
-    .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px}
+    .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;white-space:nowrap}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
     .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:linear-gradient(#fff,#f8fafc)}
     .hd b{font-size:14px}
     .bd{padding:14px}
     label{display:block;font-size:12px;color:#334155;margin:0 0 6px}
-    input,select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;outline:none}
-    input:focus,select:focus{box-shadow:0 0 0 4px rgba(37,99,235,.15);border-color:#93c5fd}
+    select,input{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;outline:none}
+    select:focus,input:focus{box-shadow:0 0 0 4px rgba(37,99,235,.15);border-color:#93c5fd}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .row > *{flex:1}
     .btn{border:1px solid var(--line);background:#fff;color:var(--txt);padding:10px 12px;border-radius:12px;font-weight:900;cursor:pointer}
@@ -33,10 +33,13 @@
     .btn.ok{background:var(--ok);border-color:transparent;color:#fff}
     .btn.bad{border-color:rgba(220,38,38,.25);color:var(--bad)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
+    .hint{color:var(--mut);font-size:12px}
+
     .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .kpi .box{flex:1;min-width:160px;border:1px solid var(--line);border-radius:14px;padding:10px;background:linear-gradient(#fff,#f8fafc)}
     .kpi .n{font-size:20px;font-weight:1000;margin:0}
     .kpi .t{font-size:12px;color:var(--mut);margin:2px 0 0}
+
     .items{display:flex;flex-direction:column;gap:10px}
     details{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
     summary{list-style:none;cursor:pointer;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
@@ -46,11 +49,9 @@
     .meta{color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tag{font-size:12px;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;white-space:nowrap}
     .tag.warn{border-color:#fde68a;background:#fffbeb;color:#92400e}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace; direction:ltr; unicode-bidi:plaintext; text-align:left}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace;direction:ltr;unicode-bidi:plaintext;text-align:left}
     .body{border-top:1px solid var(--line);background:#f8fafc;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media (max-width:640px){.body{grid-template-columns:1fr}}
-    .hint{color:var(--mut);font-size:12px}
-    .sep{height:10px}
 
     /* toast */
     .toast{position:fixed;inset:16px 16px auto 16px;display:flex;justify-content:center;z-index:9999;pointer-events:none}
@@ -71,7 +72,7 @@
     .qtyRow{display:flex;gap:10px;justify-content:center;align-items:center;margin:10px 0}
     .qbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:22px;font-weight:1000;cursor:pointer}
     .qbtn:hover{background:#f8fafc}
-    .qinp{width:120px;text-align:center;font-size:18px;font-weight:1000; direction:ltr; unicode-bidi:plaintext}
+    .qinp{width:120px;text-align:center;font-size:18px;font-weight:1000;direction:ltr;unicode-bidi:plaintext}
 
     .snap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(#fff,#f8fafc);padding:10px 12px;margin-bottom:12px}
     .snap .top{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}
@@ -80,9 +81,8 @@
     .stock{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
     .stock li{display:flex;justify-content:space-between;gap:10px;font-size:13px}
 
-    /* scan sink */
-    #scanSink{position:fixed;left:-9999px;top:-9999px;opacity:0;height:1px;width:1px; direction:ltr !important; unicode-bidi:plaintext}
-    #manual{direction:ltr; unicode-bidi:plaintext; text-align:left}
+    /* hidden sink */
+    #scanSink{position:fixed;left:-9999px;top:-9999px;opacity:0;height:1px;width:1px;direction:ltr!important;unicode-bidi:plaintext}
   </style>
 </head>
 
@@ -97,7 +97,7 @@
     </div>
   </div>
 
-  <!-- scan sink (קולט סריקות יציב) -->
+  <!-- יציב לסורקים שתומכים input-focus -->
   <input id="scanSink" autocomplete="off" />
 
   <!-- Qty modal -->
@@ -159,7 +159,7 @@
     <header>
       <div>
         <h1>העברת מלאי לפי ברקוד</h1>
-        <div class="sub">סריקה → snapshot → כמות → סיום → שליחה אחת</div>
+        <div class="sub">סרוק → פרטי מוצר → כמות → סיום → שליחה אחת</div>
       </div>
       <div class="pill" id="modePill">מצב סריקה</div>
     </header>
@@ -179,18 +179,14 @@
           <div class="box"><p class="n" id="kCount">0</p><p class="t">מוצרים ברשימה</p></div>
           <div class="box"><p class="n" id="kSum">0</p><p class="t">סה״כ יחידות</p></div>
         </div>
-
-        <label>סריקה / הקלדה ידנית</label>
-        <input id="manual" inputmode="numeric" placeholder="תסרוק… או תקליד ברקוד (לא צריך Enter)" />
-        <div class="hint" style="margin-top:6px">במצב “סיום” הסריקה כבויה. לחזרה לסריקה לחץ “חזרה”.</div>
-
-        <div class="sep"></div>
+        <div class="hint">תסרוק ברקוד. לא צריך Enter.</div>
+        <div style="height:10px"></div>
         <div class="items" id="scanList"></div>
       </div>
 
-      <!-- review -->
+      <!-- review (C2: סריקה כבויה כאן) -->
       <div class="bd" id="reviewView" style="display:none">
-        <div class="hint" style="margin-bottom:10px">מצב סיום: הסריקה כבויה.</div>
+        <div class="hint" style="margin-bottom:10px">מצב סיום: הסריקה כבויה. כדי להוסיף עוד מוצרים לחץ “חזרה”.</div>
 
         <div class="row" style="margin-bottom:10px">
           <div>
@@ -227,39 +223,39 @@
 <script>
 /* ===================== CONFIG (שים ערכים אמיתיים) ===================== */
 const BASE = "https://flebwvluqixxuhrcmuxe.supabase.co";
-const RPC_TRANSFER  = "/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
-const RPC_SNAPSHOT  = "/rest/v1/rpc/get_product_snapshot_by_barcode";
+const RPC_TRANSFER = "/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
+const RPC_SNAPSHOT = "/rest/v1/rpc/get_product_snapshot_by_barcode";
 
-const SYSTEM_API_KEY  = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
-const SUPABASE_APIKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA";
-const SUPABASE_BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA"; // בלי "Bearer"
+const SYSTEM_API_KEY  = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";  // p_api_key בגוף
+const SUPABASE_APIKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA"; // header apikey
+const SUPABASE_BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA"; // header Authorization: Bearer <token> (כאן בלי Bearer)
 
 /* ===================== STATE ===================== */
 const $ = (id)=>document.getElementById(id);
-let mode = "scan";
-let items = []; // {barcode, qty, note, snap?}
-const snapCache = new Map();
-let sinkTimer=null, manualTimer=null;
+let mode="scan";
+let items=[]; // {barcode, qty, note, snap?}
+const snapCache=new Map();
 let pendingBarcode=null, editIndex=null;
+let sinkTimer=null;
 
-/* ===================== CLEAN BARCODE (fix RTL/hidden chars) ===================== */
+// keydown scanner buffer (fallback)
+let kbuf="", ktimer=null, lastKeyTs=0, burst=false, burstTimer=null;
+
+/* ===================== UTIL ===================== */
 function cleanBarcode(raw){
-  // remove bidi marks + whitespace
-  let s = String(raw || "")
+  let s = String(raw||"")
     .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "")
     .trim();
-
-  // keep digits only (EAN/UPC). אם יש לך אותיות בברקוד - תגיד ואשנה
-  s = s.replace(/[^\d]/g, "");
+  s = s.replace(/[^\d]/g, ""); // digits-only (EAN/UPC)
   return s;
 }
 const isBarcode = (s)=>cleanBarcode(s).length>=6;
+const esc = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const sumQty = ()=>items.reduce((a,x)=>a+(+x.qty||0),0);
+const whText = (wh)=> wh ? `אזור ${wh.zone ?? "—"} · מדף ${wh.shelf ?? "—"} · תא ${wh.bin ?? "—"}` : "—";
+const stockTotal = (snap)=> snap?.stock?.reduce ? snap.stock.reduce((a,x)=>a+(+x.qty||0),0) : null;
 
-function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
-function sumQty(){return items.reduce((a,x)=>a+(+x.qty||0),0);}
-function whText(wh){return wh ? `אזור ${wh.zone ?? "—"} · מדף ${wh.shelf ?? "—"} · תא ${wh.bin ?? "—"}` : "—";}
-function stockTotal(snap){return snap?.stock?.reduce ? snap.stock.reduce((a,x)=>a+(+x.qty||0),0) : null;}
-
+/* ===================== UI ===================== */
 function toast(show, title="", desc="", ok=true){
   const box=$("toastBox");
   box.style.display = show ? "flex" : "none";
@@ -275,7 +271,7 @@ function setMode(m){
   $("scanView").style.display = (m==="scan") ? "block" : "none";
   $("reviewView").style.display = (m==="scan") ? "none" : "block";
   if(m==="scan") focusSink();
-  if(m==="review") { renderReview(); $("sendBtn").disabled = items.length===0; }
+  if(m==="review"){ renderReview(); $("sendBtn").disabled = items.length===0; }
 }
 
 function focusSink(){
@@ -296,7 +292,7 @@ function supaHeaders(){
 async function postJson(url, body){
   const r = await fetch(url, {method:"POST", headers:supaHeaders(), body:JSON.stringify(body)});
   const t = await r.text();
-  let j=null; try{ j = t ? JSON.parse(t) : null; } catch(e){}
+  let j=null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
   if(!r.ok) throw {status:r.status, raw:t, json:j};
   return j;
 }
@@ -307,11 +303,8 @@ async function fetchSnapshot(barcode){
   const raw = await postJson(BASE + RPC_SNAPSHOT, { p_barcode: bc });
 
   let data = raw;
-  if(Array.isArray(raw) && raw.length){
-    data = raw[0]?.data ? raw[0].data : raw[0];
-  } else if(raw && raw.data){
-    data = raw.data;
-  }
+  if(Array.isArray(raw) && raw.length) data = raw[0]?.data ? raw[0].data : raw[0];
+  else if(raw && raw.data) data = raw.data;
 
   const d = data || {};
   const p = d.product || {};
@@ -327,14 +320,8 @@ async function fetchSnapshot(barcode){
   return snap;
 }
 
-/* ===================== SCAN (sink + manual) ===================== */
-function onScanned(raw){
-  if(mode!=="scan") return;
-  const bc = cleanBarcode(raw);
-  if(!isBarcode(bc)) return;
-  openQty(bc);
-}
-
+/* ===================== SCAN CAPTURE ===================== */
+// 1) sink (עובד אם יש פוקוס)
 $("scanSink").addEventListener("input", ()=>{
   if(mode!=="scan") { $("scanSink").value=""; return; }
   const v = $("scanSink").value;
@@ -346,20 +333,44 @@ $("scanSink").addEventListener("input", ()=>{
   }, 70);
 });
 
+// 2) keydown fallback (עובד כשאין פוקוס input — רוב הסורקים)
+function onKeydownScan(e){
+  if(mode!=="scan") return;
+  if($("qtyMo").classList.contains("show") || $("resMo").classList.contains("show")) return;
+
+  if(!e.key || e.key.length!==1) return;
+
+  const now = Date.now();
+  const dt = now - lastKeyTs;
+  lastKeyTs = now;
+
+  if(dt>0 && dt<45){
+    burst=true;
+    if(burstTimer) clearTimeout(burstTimer);
+    burstTimer=setTimeout(()=>burst=false, 250);
+  }
+
+  // אם זה נראה כמו סורק — לא לתת לזה "לשחק" עם UI
+  if(burst) e.preventDefault();
+
+  kbuf += e.key;
+  if(ktimer) clearTimeout(ktimer);
+  ktimer = setTimeout(()=>{
+    const code = cleanBarcode(kbuf);
+    kbuf = "";
+    if(isBarcode(code)) onScanned(code);
+  }, 90);
+}
+window.addEventListener("keydown", onKeydownScan, true);
+
+// keep focus on sink while scanning (לא מפריע כי אין שדות להקלדה במסך סריקה)
 document.addEventListener("click", ()=>setTimeout(focusSink,0), true);
 
-$("manual").addEventListener("input", ()=>{
+/* ===================== FLOW ===================== */
+function onScanned(code){
   if(mode!=="scan") return;
-  const v = $("manual").value;
-  if(manualTimer) clearTimeout(manualTimer);
-  manualTimer = setTimeout(()=>{
-    const code = cleanBarcode(v);
-    if(isBarcode(code)){
-      $("manual").value="";
-      onScanned(code);
-    }
-  }, 180);
-});
+  openQty(code);
+}
 
 /* ===================== QTY MODAL ===================== */
 async function openQty(barcode, idx=null){
@@ -437,7 +448,7 @@ function confirmQty(){
   if(editIndex!=null){
     items[editIndex].qty=qty; items[editIndex].note=note;
     if(snap) items[editIndex].snap=snap;
-  }else{
+  } else {
     items.push({barcode:bc, qty, note, snap: snap || undefined});
   }
 
@@ -533,11 +544,7 @@ function renderReview(){
 }
 
 function editItem(i){ openQty(items[i].barcode, i); }
-function delItem(i){
-  items.splice(i,1);
-  renderScan();
-  if(mode==="review"){ renderReview(); }
-}
+function delItem(i){ items.splice(i,1); renderScan(); if(mode==="review") renderReview(); }
 function updQty(i,v){ items[i].qty = Math.max(1, parseInt(v||"1",10)||1); $("kSum").textContent=sumQty(); }
 function updNote(i,v){ items[i].note = String(v||"").trim(); }
 
@@ -585,7 +592,6 @@ async function sendAll(){
   }
 }
 
-/* ===================== RESULT MODAL ===================== */
 function showRes(ok,title,body){
   $("rTitle").textContent=title;
   $("rBody").textContent=body;
@@ -595,7 +601,7 @@ function showRes(ok,title,body){
   btn.className = "btn " + (ok ? "ok" : "");
   btn.onclick = ok ? resetAll : ()=>{ closeRes(); setMode("review"); };
 }
-function closeRes(){ $("resMo").classList.remove("show"); }
+function closeRes(){ $("resMo").classList.remove("show"); focusSink(); }
 function resetAll(){
   $("resMo").classList.remove("show");
   items=[];
