@@ -376,7 +376,7 @@
   const API_URL = "https://flebwvluqixxuhrcmuxe.supabase.co/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
 
   // שים כאן את המפתח בתוך הקוד (לא מוצג בשדה)
-  const SYSTEM_API_KEY = "YOUR_SYSTEM_API_KEY";
+  const SYSTEM_API_KEY = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
 
   // ========= STATE =========
   /** @type {{barcode:string, qty:number, note_he:string}[]} */
@@ -682,7 +682,7 @@
 
     const payload = buildPayload();
 
-    if(!SYSTEM_API_KEY || SYSTEM_API_KEY === "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba"){
+    if(!SYSTEM_API_KEY || SYSTEM_API_KEY === "YOUR_SYSTEM_API_KEY"){
       showToast("err", "חסר מפתח מערכת בקוד", "עדכן את SYSTEM_API_KEY בתוך הקובץ לפני שימוש.");
       return;
     }
