@@ -5,954 +5,600 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>העברת מלאי לפי ברקוד</title>
   <style>
-    :root{
-      --bg:#f7f8fb; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
-      --primary:#2563eb; --primary-2:#1d4ed8; --danger:#dc2626; --success:#16a34a;
-      --shadow: 0 10px 30px rgba(2,6,23,.08); --radius:18px; --focus: 0 0 0 4px rgba(37,99,235,.15);
-      --warn:#f59e0b;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:linear-gradient(180deg, #ffffff 0%, var(--bg) 60%, #eef2ff 100%);
-      color:var(--text);
-    }
-    .wrap{max-width:980px;margin:0 auto;padding:18px}
-    header{display:flex;gap:14px;align-items:center;justify-content:space-between;margin:10px 0 16px}
-    .brand{display:flex;flex-direction:column;gap:4px}
-    .brand h1{margin:0;font-size:20px;letter-spacing:.2px}
-    .brand p{margin:0;color:var(--muted);font-size:13px}
-    .pill{font-size:12px;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px}
-
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .card .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#fff,#f8fafc)}
-    .card .hd h2{margin:0;font-size:15px}
-    .card .bd{padding:16px}
-
-    .hint{color:var(--muted);font-size:13px;line-height:1.4}
-    label{display:block;font-size:13px;margin:0 0 6px;color:#334155}
-    input, select{
-      width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:#fff;
-      font-size:14px; outline:none; transition:.15s;
-    }
-    input:focus, select:focus{box-shadow:var(--focus);border-color:#93c5fd}
-
-    .btn{
-      appearance:none;border:0;cursor:pointer;
-      padding:11px 14px;border-radius:14px;
-      font-weight:700;font-size:14px;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      transition:.15s; user-select:none;
-      background:#fff; border:1px solid var(--line); color:var(--text);
-    }
+    :root{--bg:#f6f7fb;--card:#fff;--txt:#0f172a;--mut:#64748b;--line:#e2e8f0;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626;}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Arial;background:linear-gradient(#fff,var(--bg));color:var(--txt)}
+    .wrap{max-width:980px;margin:0 auto;padding:16px}
+    header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin:6px 0 12px}
+    h1{margin:0;font-size:18px} .sub{margin:4px 0 0;color:var(--mut);font-size:13px}
+    .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 26px rgba(2,6,23,.08);overflow:hidden}
+    .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:linear-gradient(#fff,#f8fafc)}
+    .hd b{font-size:14px}
+    .bd{padding:14px}
+    label{display:block;font-size:12px;color:#334155;margin-bottom:6px}
+    input,select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;outline:none}
+    input:focus,select:focus{box-shadow:0 0 0 4px rgba(37,99,235,.15);border-color:#93c5fd}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .row > *{flex:1}
+    .btn{border:1px solid var(--line);background:#fff;color:var(--txt);padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
     .btn:hover{background:#f8fafc}
-    .btn.primary{background:var(--primary);color:#fff;border-color:transparent}
-    .btn.primary:hover{background:var(--primary-2)}
-    .btn.danger{border-color: rgba(220,38,38,.25);color:var(--danger)}
-    .btn.danger:hover{background:rgba(220,38,38,.06)}
-    .btn.success{background:var(--success);color:#fff;border-color:transparent}
-    .btn.success:hover{filter:brightness(.95)}
+    .btn.pri{background:var(--pri);border-color:transparent;color:#fff}
+    .btn.pri:hover{filter:brightness(.95)}
+    .btn.ok{background:var(--ok);border-color:transparent;color:#fff}
+    .btn.bad{border-color:rgba(220,38,38,.25);color:var(--bad)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
-
-    .kpi{display:flex;gap:10px;flex-wrap:wrap}
-    .kpi .box{flex:1;min-width:160px;border:1px solid var(--line);border-radius:16px;padding:12px;background:linear-gradient(180deg,#fff,#f8fafc)}
-    .kpi .box .n{font-size:22px;font-weight:800;margin:0}
-    .kpi .box .t{margin:3px 0 0;color:var(--muted);font-size:12px}
-
+    .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .kpi .box{flex:1;min-width:160px;border:1px solid var(--line);border-radius:14px;padding:10px;background:linear-gradient(#fff,#f8fafc)}
+    .kpi .n{font-size:20px;font-weight:900;margin:0}
+    .kpi .t{font-size:12px;color:var(--mut);margin:2px 0 0}
     .items{display:flex;flex-direction:column;gap:10px}
-    details.item{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}
-    details.item summary{list-style:none;cursor:pointer;padding:12px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    details.item summary::-webkit-details-marker{display:none}
-
-    .itemTop{display:flex;gap:10px;align-items:center;min-width:0;flex:1}
-    .badge{font-size:12px;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:999px;padding:6px 10px;white-space:nowrap}
-    .badge.warn{background:#fffbeb;color:#92400e;border-color:#fde68a}
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:12.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    }
-    .titleLine{display:flex;flex-direction:column;gap:2px;min-width:0}
-    .pname{font-weight:900;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .psub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-    .itemBody{border-top:1px solid var(--line);padding:12px;background:#f8fafc;display:grid;grid-template-columns: 1fr 1fr;gap:10px}
-    @media (max-width: 640px){ .itemBody{grid-template-columns:1fr} }
-    .rightActions{display:flex;gap:8px;align-items:center}
-    .divider{height:1px;background:var(--line);margin:12px 0}
-    .hidden{display:none !important;}
-
-    .toast{position:fixed; top:16px; left:16px; right:16px;display:flex; justify-content:center;pointer-events:none; z-index:9999}
-    .toast .msg{
-      pointer-events:auto; max-width:980px; width:100%;
-      border-radius:16px; padding:12px 14px; border:1px solid var(--line); background:#fff; box-shadow:var(--shadow);
-      display:none; gap:10px; align-items:flex-start; white-space:pre-wrap;
-    }
-    .toast .msg.show{display:flex}
-    .toast .msg.ok{border-color: rgba(22,163,74,.35)}
-    .toast .msg.err{border-color: rgba(220,38,38,.35)}
-    .toast .title{font-weight:800}
-    .toast .desc{color:var(--muted);font-size:13px;margin-top:2px}
-    .toast .x{margin-inline-start:auto}
-
-    .modalOverlay{position:fixed; inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:9998}
-    .modalOverlay.show{display:flex}
-    .modal{width:min(560px, 100%);background:#fff;border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
-    .modal .mhd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#fff,#f8fafc)}
-    .modal .mhd h3{margin:0;font-size:15px}
-    .modal .mbd{padding:16px}
-
-    .qtyPicker{display:flex;gap:10px;align-items:center;justify-content:center;padding:10px 0 2px}
-    .qtyBtn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:20px;font-weight:900}
-    .qtyBtn:hover{background:#f8fafc}
-    .qtyInput{width:120px;text-align:center;font-size:18px;font-weight:800}
-
-    .footerBar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end;padding:14px 16px;border-top:1px solid var(--line);background:#fff}
-    .smallNote{font-size:12px;color:var(--muted);line-height:1.35}
-
-    .snapBox{
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:linear-gradient(180deg,#fff,#f8fafc);
-      padding:12px;
-      margin-bottom:12px;
-    }
-    .snapTop{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
-    .snapName{font-weight:900}
-    .snapMeta{font-size:12px;color:var(--muted)}
-    .snapGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media (max-width: 560px){ .snapGrid{grid-template-columns:1fr} }
-    .kv{border:1px solid var(--line);border-radius:14px;background:#fff;padding:10px 12px}
-    .kv .k{font-size:12px;color:var(--muted);margin-bottom:4px}
-    .kv .v{font-weight:800}
-    .stockList{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
-    .stockRow{display:flex;justify-content:space-between;gap:10px;font-size:13px}
-    .stockRow .loc{color:#334155}
-    .stockRow .qty{font-weight:900}
-    .skeleton{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;position:relative}
-    .skeleton:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);animation:shimmer 1.1s infinite}
-    @keyframes shimmer{100%{transform:translateX(100%)}}
+    details{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+    summary{list-style:none;cursor:pointer;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+    summary::-webkit-details-marker{display:none}
+    .left{min-width:0;flex:1}
+    .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tag{font-size:12px;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;white-space:nowrap}
+    .tag.warn{border-color:#fde68a;background:#fffbeb;color:#92400e}
+    .body{border-top:1px solid var(--line);background:#f8fafc;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:640px){.body{grid-template-columns:1fr}}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    .toast{position:fixed;inset:16px 16px auto 16px;display:flex;justify-content:center;z-index:9999;pointer-events:none}
+    .toast > div{pointer-events:auto;max-width:980px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 10px 26px rgba(2,6,23,.12);display:none;gap:10px;align-items:flex-start;white-space:pre-wrap}
+    .toast .show{display:flex}
+    .toast .ok{border-color:rgba(22,163,74,.35)}
+    .toast .err{border-color:rgba(220,38,38,.35)}
+    .toast b{display:block}
+    .toast p{margin:2px 0 0;color:var(--mut);font-size:13px}
+    .modalO{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:9998}
+    .modalO.show{display:flex}
+    .modal{width:min(560px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(2,6,23,.2);overflow:hidden}
+    .mhd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#fff,#f8fafc)}
+    .mbd{padding:14px}
+    .mft{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;background:#fff}
+    .qtyRow{display:flex;gap:10px;justify-content:center;align-items:center;margin:10px 0}
+    .qbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:22px;font-weight:900;cursor:pointer}
+    .qbtn:hover{background:#f8fafc}
+    .qinp{width:120px;text-align:center;font-size:18px;font-weight:900}
+    .snap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(#fff,#f8fafc);padding:10px 12px;margin-bottom:12px}
+    .snap .top{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}
+    .snap .top .n{font-weight:900}
+    .snap .top .m{color:var(--mut);font-size:12px}
+    .stock{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+    .stock li{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+    .hint{color:var(--mut);font-size:12px}
+    /* hidden scan sink */
+    #scanSink{position:fixed;left:-9999px;top:-9999px;opacity:0;height:1px;width:1px}
   </style>
 </head>
+
 <body>
   <div class="toast">
-    <div id="toast" class="msg">
-      <div>
-        <div id="toastTitle" class="title"></div>
-        <div id="toastDesc" class="desc"></div>
+    <div id="toastBox">
+      <div style="flex:1">
+        <b id="tTitle"></b>
+        <p id="tDesc"></p>
       </div>
-      <button class="btn x" onclick="hideToast()">סגור</button>
+      <button class="btn" onclick="toast(false)">סגור</button>
     </div>
   </div>
 
-  <!-- Quantity Modal -->
-  <div class="modalOverlay" id="qtyModal">
-    <div class="modal" role="dialog" aria-modal="true">
+  <!-- Always-focused sink to catch scanner input reliably -->
+  <input id="scanSink" autocomplete="off" />
+
+  <!-- Qty modal -->
+  <div class="modalO" id="qtyModal">
+    <div class="modal">
       <div class="mhd">
-        <h3>בחר כמות</h3>
-        <button class="btn" onclick="closeQtyModal()">ביטול</button>
+        <b>בחר כמות</b>
+        <button class="btn" onclick="closeQty()">ביטול</button>
       </div>
       <div class="mbd">
-        <!-- Snapshot -->
-        <div id="snapBox" class="snapBox">
-          <div class="snapTop">
-            <div class="snapName" id="snapName">טוען פרטי מוצר…</div>
-            <div class="snapMeta" id="snapMeta"><span class="mono" id="mBarcode"></span></div>
+        <div class="snap">
+          <div class="top">
+            <div class="n" id="snapName">טוען פרטי מוצר…</div>
+            <div class="m"><span class="mono" id="mBarcode"></span></div>
           </div>
-
-          <div id="snapLoading">
-            <div class="skeleton" style="height:12px;margin-bottom:8px"></div>
-            <div class="skeleton" style="height:12px;width:70%;margin-bottom:14px"></div>
-            <div class="snapGrid">
-              <div class="kv"><div class="k">מק״ט</div><div class="v"><span class="skeleton" style="display:block;height:12px"></span></div></div>
-              <div class="kv"><div class="k">מיקום במחסן</div><div class="v"><span class="skeleton" style="display:block;height:12px"></span></div></div>
-              <div class="kv"><div class="k">מלאי לפי מיקומים</div><div class="v"><span class="skeleton" style="display:block;height:12px"></span></div></div>
-              <div class="kv"><div class="k">סטטוס</div><div class="v"><span class="skeleton" style="display:block;height:12px"></span></div></div>
-            </div>
+          <div class="row" style="gap:8px">
+            <div class="tag" id="snapSkuTag">מק״ט: —</div>
+            <div class="tag" id="snapWhTag">מחסן: —</div>
           </div>
-
-          <div id="snapReady" class="hidden">
-            <div class="snapGrid">
-              <div class="kv">
-                <div class="k">מק״ט</div>
-                <div class="v" id="snapSku">—</div>
-              </div>
-              <div class="kv">
-                <div class="k">מיקום במחסן</div>
-                <div class="v" id="snapWhLoc">—</div>
-              </div>
-              <div class="kv" style="grid-column:1 / -1">
-                <div class="k">מלאי לפי מיקומים</div>
-                <ul class="stockList" id="snapStock"></ul>
-              </div>
-            </div>
+          <div style="margin-top:10px">
+            <div class="hint">מלאי לפי מיקומים</div>
+            <ul class="stock" id="snapStock"><li class="hint">טוען…</li></ul>
           </div>
-
-          <div id="snapErr" class="hidden hint" style="color:var(--danger)">
-            לא הצלחתי להביא פרטי מוצר. אפשר להמשיך בכל זאת.
-          </div>
+          <div class="hint" id="snapErr" style="display:none;color:var(--bad);margin-top:8px">לא הצלחתי להביא פרטי מוצר (אפשר להמשיך).</div>
         </div>
 
-        <!-- Qty picker -->
-        <div class="qtyPicker">
-          <button class="qtyBtn" onclick="stepQty(-1)" aria-label="הפחת">−</button>
-          <input id="mQty" class="qtyInput" type="number" inputmode="numeric" min="1" step="1" value="1" />
-          <button class="qtyBtn" onclick="stepQty(1)" aria-label="הוסף">+</button>
+        <div class="qtyRow">
+          <button class="qbtn" onclick="stepQty(-1)">−</button>
+          <input id="mQty" class="qinp" type="number" min="1" step="1" value="1" />
+          <button class="qbtn" onclick="stepQty(1)">+</button>
         </div>
 
-        <div class="divider"></div>
-
-        <label for="mItemNote">הערה לפריט (אופציונלי)</label>
-        <input id="mItemNote" type="text" placeholder="לדוגמה: העברה 1" />
-
-        <div class="smallNote" style="margin-top:10px">
-          אם תסרוק אותו ברקוד שוב — נפתח שוב חלון כמות ויעדכן את הפריט הקיים (לא ייצור כפילות).
-        </div>
+        <label>הערה לפריט (אופציונלי)</label>
+        <input id="mNote" placeholder="לדוגמה: העברה 1" />
       </div>
-      <div class="footerBar">
-        <button class="btn primary" onclick="confirmQty()">אישור</button>
+      <div class="mft">
+        <button class="btn pri" onclick="confirmQty()">אישור</button>
       </div>
     </div>
   </div>
 
-  <!-- Result Modal -->
-  <div class="modalOverlay" id="resultModal">
-    <div class="modal" role="dialog" aria-modal="true">
+  <!-- Result modal -->
+  <div class="modalO" id="resModal">
+    <div class="modal">
       <div class="mhd">
-        <h3 id="resultTitle">סטטוס</h3>
-        <button class="btn" onclick="closeResultModal()">סגור</button>
+        <b id="rTitle">סטטוס</b>
+        <button class="btn" onclick="closeRes()">סגור</button>
       </div>
       <div class="mbd">
-        <div id="resultBody" class="hint"></div>
+        <div class="hint" id="rBody" style="white-space:pre-wrap"></div>
       </div>
-      <div class="footerBar">
-        <button id="resultPrimaryBtn" class="btn success" onclick="resetToStart()">חזרה להתחלה</button>
+      <div class="mft">
+        <button class="btn ok" id="rBtn" onclick="resetAll()">חזרה להתחלה</button>
       </div>
     </div>
   </div>
 
   <div class="wrap">
     <header>
-      <div class="brand">
+      <div>
         <h1>העברת מלאי לפי ברקוד</h1>
-        <p>סורקים → מציג פרטי מוצר → בוחרים כמות → מסיימים ושולחים הכל בפעם אחת</p>
+        <div class="sub">סורק עובד בכל מצב (גם במסך סיום) · בוחר כמות מיד · שולח הכל בפעם אחת</div>
       </div>
-      <div class="pill" id="scannerState">מצב סריקה פעיל</div>
+      <div class="pill" id="modePill">מצב סריקה</div>
     </header>
 
-    <div class="card" id="mainCard">
+    <div class="card">
       <div class="hd">
-        <h2 id="mainTitle">סריקה והוספת מוצרים</h2>
-        <div class="rightActions">
-          <button class="btn" id="finishBtn" onclick="goToReview()" disabled>סיום</button>
-          <button class="btn danger" onclick="clearItems()" title="מוחק את כל הפריטים">נקה</button>
+        <b id="title">סריקה והוספת מוצרים</b>
+        <div class="row" style="flex:0 0 auto;gap:8px">
+          <button class="btn" id="finishBtn" onclick="toReview()" disabled>סיום</button>
+          <button class="btn bad" onclick="clearItems()">נקה</button>
         </div>
       </div>
 
-      <!-- Scan section -->
-      <div class="bd" id="scanSection">
-        <div class="kpi" style="margin-bottom:12px">
-          <div class="box">
-            <p class="n" id="kpiCount">0</p>
-            <p class="t">מוצרים ברשימה</p>
-          </div>
-          <div class="box">
-            <p class="n" id="kpiSum">0</p>
-            <p class="t">סה״כ יחידות</p>
-          </div>
+      <!-- scan view -->
+      <div class="bd" id="scanView">
+        <div class="kpi">
+          <div class="box"><p class="n" id="kCount">0</p><p class="t">מוצרים ברשימה</p></div>
+          <div class="box"><p class="n" id="kSum">0</p><p class="t">סה״כ יחידות</p></div>
         </div>
 
-        <div class="card" style="box-shadow:none;border-radius:16px;">
-          <div class="bd">
-            <label for="manualBarcode">סריקה / הקלדה ידנית</label>
-            <input id="manualBarcode" autocomplete="off" inputmode="numeric" placeholder="תסרוק עכשיו… (או תקליד ברקוד)" />
-            <div class="hint" style="margin-top:8px">המערכת קולטת אוטומטית אחרי “עצירה קצרה” — לא צריך Enter.</div>
-          </div>
-        </div>
+        <label>סריקה / הקלדה ידנית (לא חובה)</label>
+        <input id="manual" inputmode="numeric" placeholder="תסרוק… (או תקליד ברקוד) — לא צריך Enter" />
+        <div style="height:10px"></div>
 
-        <div class="divider"></div>
-        <div id="scanItemsPreview" class="items"></div>
+        <div class="items" id="scanList"></div>
       </div>
 
-      <!-- Review section -->
-      <div class="bd hidden" id="reviewSection">
-        <div class="hint" style="margin-bottom:12px">
-          בחר מיקום מקור ויעד ואז שלח. (הרשימה מכווצת כברירת מחדל — פותחים רק אם רוצים לערוך)
-        </div>
+      <!-- review view -->
+      <div class="bd" id="reviewView" style="display:none">
+        <div class="hint" style="margin-bottom:10px">בחר מקור ויעד, בדוק רשימה (מכווצת) ואז שלח.</div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="row" style="margin-bottom:10px">
           <div>
-            <label for="fromLoc">מיקום נוכחי (מקור)</label>
+            <label>מיקום נוכחי (מקור)</label>
             <select id="fromLoc">
-              <option value="PICKING">ליקוט (PICKING)</option>
-              <option value="STORE">חנות (STORE)</option>
-              <option value="WAREHOUSE" selected>מחסן (WAREHOUSE)</option>
+              <option value="PICKING">ליקוט</option>
+              <option value="STORE">חנות</option>
+              <option value="WAREHOUSE" selected>מחסן</option>
             </select>
           </div>
           <div>
-            <label for="toLoc">יעד</label>
+            <label>יעד</label>
             <select id="toLoc">
-              <option value="PICKING" selected>ליקוט (PICKING)</option>
-              <option value="STORE">חנות (STORE)</option>
-              <option value="WAREHOUSE">מחסן (WAREHOUSE)</option>
+              <option value="PICKING" selected>ליקוט</option>
+              <option value="STORE">חנות</option>
+              <option value="WAREHOUSE">מחסן</option>
             </select>
           </div>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="hd" style="border:1px solid var(--line);border-radius:16px;margin-bottom:10px">
-          <h2 style="font-size:14px;margin:0">רשימת מוצרים לשליחה</h2>
-          <div class="rightActions">
-            <button class="btn" onclick="backToScan()">חזרה לסריקה</button>
-            <button class="btn primary" id="sendBtn" onclick="sendAll()" disabled>שלח</button>
+        <div class="hd" style="border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff">
+          <b style="font-size:13px">רשימת מוצרים לשליחה</b>
+          <div class="row" style="flex:0 0 auto;gap:8px">
+            <button class="btn" onclick="toScan()">חזרה</button>
+            <button class="btn pri" id="sendBtn" onclick="sendAll()" disabled>שלח</button>
           </div>
         </div>
 
-        <div id="reviewItems" class="items"></div>
+        <div class="items" id="reviewList"></div>
 
-        <div class="divider"></div>
-        <details style="border:1px solid var(--line);border-radius:16px;background:#fff;padding:8px 12px">
-          <summary style="cursor:pointer;font-weight:800">תצוגה מקדימה של ה-JSON שיישלח</summary>
-          <pre id="jsonPreview" style="white-space:pre-wrap;word-break:break-word;margin:10px 0 8px;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:14px;font-size:12px"></pre>
+        <details style="margin-top:10px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px 12px">
+          <summary style="cursor:pointer;font-weight:900">תצוגה מקדימה JSON</summary>
+          <pre id="jsonPrev" style="white-space:pre-wrap;word-break:break-word;margin:8px 0 0;background:#f8fafc;border:1px solid var(--line);padding:10px;border-radius:12px;font-size:12px"></pre>
         </details>
       </div>
     </div>
   </div>
 
 <script>
-  // ========= CONFIG =========
-  const BASE = "https://flebwvluqixxuhrcmuxe.supabase.co";
-  const STOCK_TRANSFER_RPC = "/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
-  const SNAPSHOT_RPC = "/rest/v1/rpc/get_product_snapshot_by_barcode";
+/* ===================== CONFIG (fill in) ===================== */
+const BASE = "https://flebwvluqixxuhrcmuxe.supabase.co";
+const RPC_TRANSFER = "/rest/v1/rpc/stock_transfer_by_barcode_secure_bulk";
+const RPC_SNAPSHOT = "/rest/v1/rpc/get_product_snapshot_by_barcode";
 
-  // (1) המפתח שה-RPC שלך מצפה לקבל בגוף תחת p_api_key
-  const SYSTEM_API_KEY = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
+// מפתח המערכת שלך שנשלח בגוף: p_api_key
+const SYSTEM_API_KEY = "686c7e15-d050-4455-a929-c5d4c7d0-4405-4b86-81ed-7dc65bbd58ba";
 
-  // (2) Supabase headers (חובה ל-REST)
-  const SUPABASE_APIKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA";          // apikey
-  const SUPABASE_BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA";     // בלי המילה Bearer
+// Supabase headers (apikey + Authorization Bearer)
+const SUPABASE_APIKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA";
+const SUPABASE_BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsZWJ3dmx1cWl4eHVocmNtdXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxOTQ4NDUsImV4cCI6MjA4NTc3MDg0NX0.OS3vKX3Fq4G7raALFCrawyQ9l7YsuWRSGLFO0lULvuA"; // בלי המילה "Bearer"
 
-  // ========= STATE =========
-  /**
-   * items:
-   * {
-   *   barcode, qty, note_he,
-   *   snapshot?: { sku, name_he, unit_he, warehouse_location, stock[] }
-   * }
-   */
-  let items = [];
-  let currentMode = "scan";
+/* ===================== STATE ===================== */
+const $ = (id)=>document.getElementById(id);
+let mode = "scan";
+let items = []; // {barcode, qty, note, snap?}
+const snapCache = new Map();
 
-  let scanBuffer = "";
-  let scanTimer = null;
-  let manualTimer = null;
-  let lastKeyTs = 0;
-  let isScannerBurst = false;
-  let burstResetTimer = null;
+// scan sink debounce
+let sinkTimer = null;
+let manualTimer = null;
 
+// qty modal state
+let pendingBarcode = null;
+let editIndex = null;
 
-  let pendingBarcode = null;
-  let editingIndex = null;
-
-  // snapshot cache per barcode
-  const snapshotCache = new Map();
-
-  const $ = (id) => document.getElementById(id);
-
-  function sumQty(){ return items.reduce((a,b)=>a + (Number(b.qty)||0), 0); }
-
-  function showToast(type, title, desc){
-    const t = $("toast");
-    t.className = "msg show " + (type === "ok" ? "ok" : "err");
-    $("toastTitle").textContent = title;
-    $("toastDesc").textContent = desc || "";
-  }
-  function hideToast(){ $("toast").className = "msg"; }
-
-  function setMode(mode){
-    currentMode = mode;
-    $("scannerState").textContent = mode === "scan" ? "מצב סריקה פעיל" : "מצב סקירה ושליחה";
-
-    const scan = $("scanSection");
-    const rev  = $("reviewSection");
-
-    if(mode === "scan"){
-      scan.classList.remove("hidden");
-      rev.classList.add("hidden");
-      $("mainTitle").textContent = "סריקה והוספת מוצרים";
-      $("manualBarcode").focus();
-    }else{
-      scan.classList.add("hidden");
-      rev.classList.remove("hidden");
-      $("mainTitle").textContent = "סקירה ושליחה";
-      renderReview();
-      refreshJsonPreview();
-      scanBuffer = "";
-if(scanTimer){
-  clearTimeout(scanTimer);
-  scanTimer = null;
+/* ===================== UI helpers ===================== */
+function toast(show, title="", desc="", ok=true){
+  const box = $("toastBox");
+  box.className = (show ? "show " : "") + (ok ? "ok" : "err");
+  box.style.display = show ? "flex" : "none";
+  $("tTitle").textContent = title;
+  $("tDesc").textContent = desc;
 }
-    }
+function setMode(m){
+  mode = m;
+  $("modePill").textContent = (m==="scan") ? "מצב סריקה" : "מצב סיום";
+  $("title").textContent = (m==="scan") ? "סריקה והוספת מוצרים" : "סקירה ושליחה";
+  $("scanView").style.display = (m==="scan") ? "block" : "none";
+  $("reviewView").style.display = (m==="scan") ? "none" : "block";
+  focusSink();
+  if(m==="review"){ renderReview(); refreshJson(); }
+}
+function sumQty(){ return items.reduce((a,x)=>a+(+x.qty||0),0); }
+function norm(s){ return String(s||"").trim(); }
+function isBarcode(s){ return norm(s).length >= 6; }
+function whText(wh){
+  if(!wh) return "—";
+  const z = wh.zone ?? "—", s = wh.shelf ?? "—", b = wh.bin ?? "—";
+  return `אזור ${z} · מדף ${s} · תא ${b}`;
+}
+function stockTotal(snap){
+  if(!snap || !Array.isArray(snap.stock)) return null;
+  return snap.stock.reduce((a,x)=>a+(+x.qty||0),0);
+}
+function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
+
+/* ===================== Scan sink (fixes your bug) ===================== */
+function focusSink(){
+  if($("qtyModal").classList.contains("show")) return;
+  if($("resModal").classList.contains("show")) return;
+  $("scanSink").focus();
+}
+function onSinkInput(){
+  const v = $("scanSink").value;
+  if(sinkTimer) clearTimeout(sinkTimer);
+  sinkTimer = setTimeout(()=>{
+    const code = norm(v);
+    $("scanSink").value = "";
+    if(isBarcode(code)) onScanned(code);
+  }, 80);
+}
+// keep focus even after clicks
+document.addEventListener("click", ()=>setTimeout(focusSink,0), true);
+document.addEventListener("focusin", (e)=>{
+  // אם נכנסים לשדה ידני/סלקט זה בסדר, אבל בסורק נרצה לחזור לפוקוס sink מיד אחרי
+  if(e.target && (e.target.id==="manual" || e.target.tagName==="SELECT")) setTimeout(focusSink,0);
+});
+
+/* ===================== Snapshot fetch ===================== */
+function supaHeaders(){
+  return {
+    "Content-Type":"application/json",
+    "apikey": SUPABASE_APIKEY,
+    "Authorization":"Bearer " + SUPABASE_BEARER
+  };
+}
+async function fetchSnapshot(barcode){
+  const bc = norm(barcode);
+  if(snapCache.has(bc)) return snapCache.get(bc);
+
+  const url = BASE + RPC_SNAPSHOT;
+
+  async function post(body){
+    const r = await fetch(url, {method:"POST", headers:supaHeaders(), body:JSON.stringify(body)});
+    const t = await r.text();
+    let j=null; try{j=t?JSON.parse(t):null}catch(e){}
+    if(!r.ok) throw {status:r.status, body:j||t};
+    return j;
   }
 
-  function normalizeBarcode(s){ return String(s || "").trim(); }
-  function isLikelyBarcode(s){ return normalizeBarcode(s).length >= 6; }
+  // try common arg names (כדי שלא תיתקע אם RPC מצפה לשם שונה)
+  let raw;
+  try{ raw = await post({p_barcode: bc}); }
+  catch(_){ raw = await post({barcode: bc}); }
 
-  // ========= Snapshot fetch =========
-  function headersSupabase(){
-    return {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_APIKEY,
-      "Authorization": "Bearer " + SUPABASE_BEARER_TOKEN
-    };
+  let data = raw;
+  if(Array.isArray(raw) && raw.length){
+    data = raw[0]?.data ? raw[0].data : raw[0];
+  } else if(raw && raw.data){
+    data = raw.data;
   }
 
-  // תומך בשתי צורות פרמטר, כדי שלא תיתקע אם ה-RPC מצפה לשם אחר
-  async function fetchSnapshot(barcode){
-    const bc = normalizeBarcode(barcode);
-    if(snapshotCache.has(bc)) return snapshotCache.get(bc);
+  const d = data || {};
+  const p = d.product || {};
+  const snap = {
+    barcode: d.barcode || bc,
+    sku: p.sku || "",
+    name_he: p.name_he || "",
+    unit_he: p.unit_he || "",
+    warehouse_location: d.warehouse_location || null,
+    stock: Array.isArray(d.stock) ? d.stock : []
+  };
+  snapCache.set(bc, snap);
+  return snap;
+}
 
-    const url = BASE + SNAPSHOT_RPC;
+/* ===================== Flow ===================== */
+async function onScanned(barcode){
+  // תמיד נפתח מודאל מיד
+  openQty(barcode);
+}
+async function openQty(barcode, idx=null){
+  pendingBarcode = barcode;
+  editIndex = idx;
 
-    async function tryBody(bodyObj){
-      const res = await fetch(url, { method:"POST", headers: headersSupabase(), body: JSON.stringify(bodyObj) });
-      const text = await res.text();
-      let json = null;
-      try { json = text ? JSON.parse(text) : null; } catch(e){}
-      if(!res.ok) {
-        const err = new Error(text || ("HTTP " + res.status));
-        err.status = res.status;
-        err.body = json || text;
-        throw err;
-      }
-      return json;
-    }
-
-    let raw;
-    try{
-      raw = await tryBody({ p_barcode: bc });
-    }catch(e1){
-      // fallback
-      raw = await tryBody({ barcode: bc });
-    }
-
-    // normalize shapes:
-    // Sometimes you'll get: [{data:{...}}] (like your example wrapper), sometimes direct array of rows, sometimes object
-    let data = null;
-
-    if(Array.isArray(raw) && raw.length){
-      // wrapper style
-      if(raw[0] && raw[0].data) data = raw[0].data;
-      else data = raw[0];
-    }else if(raw && raw.data){
-      data = raw.data;
-    }else{
-      data = raw;
-    }
-
-    const snap = normalizeSnapshot(data);
-    snapshotCache.set(bc, snap);
-    return snap;
+  // preload qty/note
+  if(idx!=null){
+    $("mQty").value = items[idx].qty || 1;
+    $("mNote").value = items[idx].note || "";
+  } else {
+    const ex = items.findIndex(x=>x.barcode===barcode);
+    if(ex>=0){ editIndex = ex; $("mQty").value = items[ex].qty || 1; $("mNote").value = items[ex].note || ""; }
+    else { $("mQty").value = 1; $("mNote").value = ""; }
   }
 
-  function normalizeSnapshot(data){
-    const d = data || {};
-    const prod = d.product || {};
-    return {
-      barcode: d.barcode || "",
-      sku: prod.sku || "",
-      name_he: prod.name_he || "",
-      unit_he: prod.unit_he || "",
-      warehouse_location: d.warehouse_location || { zone:null, shelf:null, bin:null },
-      stock: Array.isArray(d.stock) ? d.stock : []
-    };
-  }
+  // show modal + loading snapshot ui
+  $("qtyModal").classList.add("show");
+  $("mBarcode").textContent = barcode;
+  $("snapName").textContent = "טוען פרטי מוצר…";
+  $("snapSkuTag").textContent = "מק״ט: —";
+  $("snapWhTag").textContent = "מחסן: —";
+  $("snapStock").innerHTML = `<li class="hint">טוען…</li>`;
+  $("snapErr").style.display = "none";
 
-  function whLocToText(wh){
-    if(!wh) return "—";
-    const zone = wh.zone ?? "—";
-    const shelf = wh.shelf ?? "—";
-    const bin = wh.bin ?? "—";
-    // לא מנחש פורמט שלך, אבל מראה ברור
-    return `אזור: ${zone} | מדף: ${shelf} | תא: ${bin}`;
-  }
-
-  function renderSnapshotInModal(snap){
-    $("snapLoading").classList.add("hidden");
-    $("snapErr").classList.add("hidden");
-    $("snapReady").classList.remove("hidden");
-
-    const name = snap.name_he ? `${snap.name_he}${snap.unit_he ? ` (${snap.unit_he})` : ""}` : "מוצר לא מזוהה";
+  // fetch snapshot
+  try{
+    const snap = await fetchSnapshot(barcode);
+    const name = snap.name_he ? snap.name_he + (snap.unit_he?` (${snap.unit_he})`:"") : "מוצר";
     $("snapName").textContent = name;
-    $("snapSku").textContent = snap.sku || "—";
-    $("snapWhLoc").textContent = whLocToText(snap.warehouse_location);
-
-    const ul = $("snapStock");
-    ul.innerHTML = "";
+    $("snapSkuTag").textContent = "מק״ט: " + (snap.sku || "—");
+    $("snapWhTag").textContent = "מחסן: " + whText(snap.warehouse_location);
 
     if(!snap.stock.length){
-      ul.innerHTML = `<li class="hint">אין נתוני מלאי</li>`;
-      return;
+      $("snapStock").innerHTML = `<li class="hint">אין נתוני מלאי</li>`;
+    } else {
+      $("snapStock").innerHTML = snap.stock.map(s=>{
+        const loc = esc(s.location_name_he || s.location_code || "");
+        const q = esc(String(s.qty ?? 0));
+        return `<li><span>${loc}</span><span class="mono" style="font-weight:900">${q}</span></li>`;
+      }).join("");
     }
-
-    snap.stock.forEach(s=>{
-      const li = document.createElement("li");
-      li.className = "stockRow";
-      li.innerHTML = `<span class="loc">${escapeHtml(s.location_name_he || s.location_code || "")}</span><span class="qty">${escapeHtml(String(s.qty ?? 0))}</span>`;
-      ul.appendChild(li);
-    });
+  }catch(_){
+    $("snapErr").style.display = "block";
   }
 
-  function renderSnapshotLoading(barcode){
-    $("mBarcode").textContent = barcode;
-    $("snapName").textContent = "טוען פרטי מוצר…";
-    $("snapMeta").innerHTML = `<span class="mono">${escapeHtml(barcode)}</span>`;
+  setTimeout(()=>$("mQty").focus(), 10);
+}
+function closeQty(){
+  $("qtyModal").classList.remove("show");
+  pendingBarcode = null;
+  editIndex = null;
+  focusSink();
+}
+function stepQty(d){
+  const el = $("mQty");
+  let v = Math.max(1, (parseInt(el.value||"1",10)||1) + d);
+  el.value = v;
+}
+async function confirmQty(){
+  const bc = pendingBarcode;
+  if(!bc) return;
+  const qty = Math.max(1, parseInt($("mQty").value||"1",10)||1);
+  const note = norm($("mNote").value);
 
-    $("snapReady").classList.add("hidden");
-    $("snapErr").classList.add("hidden");
-    $("snapLoading").classList.remove("hidden");
+  // attach cached snapshot if exists (so list shows name/sku/stock)
+  const snap = snapCache.get(norm(bc)) || null;
+
+  if(editIndex!=null){
+    items[editIndex].qty = qty;
+    items[editIndex].note = note;
+    if(snap) items[editIndex].snap = snap;
+  } else {
+    items.push({barcode: bc, qty, note, snap: snap || undefined});
   }
 
-  function renderSnapshotError(barcode, errText){
-    $("mBarcode").textContent = barcode;
-    $("snapName").textContent = "מוצר (לא נטען)";
-    $("snapMeta").innerHTML = `<span class="mono">${escapeHtml(barcode)}</span>`;
+  closeQty();
+  renderScan();
+}
 
-    $("snapLoading").classList.add("hidden");
-    $("snapReady").classList.add("hidden");
-    $("snapErr").classList.remove("hidden");
-    if(errText) $("snapErr").textContent = "לא הצלחתי להביא פרטי מוצר. אפשר להמשיך בכל זאת.\n" + errText;
+/* ===================== Lists ===================== */
+function renderScan(){
+  $("kCount").textContent = items.length;
+  $("kSum").textContent = sumQty();
+  $("finishBtn").disabled = items.length===0;
+
+  const host = $("scanList");
+  if(!items.length){
+    host.innerHTML = `<div class="hint">עוד אין מוצרים. תסרוק.</div>`;
+    return;
   }
 
-  // ========= Qty Modal =========
-  async function openQtyModal(barcode, indexToEdit=null){
-    pendingBarcode = barcode;
-    editingIndex = indexToEdit;
-
-    // set qty/note
-    if(indexToEdit !== null){
-      $("mQty").value = String(items[indexToEdit].qty ?? 1);
-      $("mItemNote").value = items[indexToEdit].note_he ?? "";
-    }else{
-      const existingIdx = items.findIndex(x => x.barcode === barcode);
-      if(existingIdx !== -1){
-        editingIndex = existingIdx;
-        $("mQty").value = String(items[existingIdx].qty ?? 1);
-        $("mItemNote").value = items[existingIdx].note_he ?? "";
-      }else{
-        $("mQty").value = "1";
-        $("mItemNote").value = "";
-      }
-    }
-
-    // show modal immediately with loading snapshot
-    $("qtyModal").classList.add("show");
-    renderSnapshotLoading(barcode);
-
-    // fetch snapshot fast
-    try{
-      const snap = await fetchSnapshot(barcode);
-      renderSnapshotInModal(snap);
-    }catch(err){
-      const msg = (err && err.body) ? (typeof err.body === "string" ? err.body : JSON.stringify(err.body)) : String(err);
-      renderSnapshotError(barcode, msg ? String(msg).slice(0, 220) : "");
-    }
-
-    setTimeout(()=> $("mQty").focus(), 50);
-  }
-
-  function closeQtyModal(){
-    $("qtyModal").classList.remove("show");
-    pendingBarcode = null;
-    editingIndex = null;
-    $("manualBarcode").value = "";
-    $("manualBarcode").focus();
-  }
-
-  function stepQty(delta){
-    const el = $("mQty");
-    let v = Number(el.value || 0);
-    v = isFinite(v) ? v : 0;
-    v = Math.max(1, v + delta);
-    el.value = String(v);
-  }
-
-  async function confirmQty(){
-    const bc = pendingBarcode;
-    if(!bc) return;
-
-    let qty = Number($("mQty").value);
-    if(!isFinite(qty) || qty < 1){
-      showToast("err", "כמות לא תקינה", "בחר כמות של 1 ומעלה.");
-      $("mQty").focus();
-      return;
-    }
-    qty = Math.floor(qty);
-
-    const note = String($("mItemNote").value || "").trim();
-
-    // attach snapshot if exists
-    let snap = null;
-    try{
-      snap = snapshotCache.get(normalizeBarcode(bc)) || null;
-    }catch(e){}
-
-    if(editingIndex !== null){
-      items[editingIndex].qty = qty;
-      items[editingIndex].note_he = note;
-      if(snap) items[editingIndex].snapshot = snap;
-    }else{
-      items.push({ barcode: bc, qty, note_he: note, snapshot: snap || undefined });
-    }
-
-    closeQtyModal();
-    renderScanPreview();
-  }
-
-  // ========= Items UI =========
-  function clearItems(){
-    items = [];
-    renderScanPreview();
-    if(currentMode === "review"){ renderReview(); refreshJsonPreview(); }
-  }
-  function deleteItem(index){
-    items.splice(index, 1);
-    renderScanPreview();
-    if(currentMode === "review"){ renderReview(); refreshJsonPreview(); }
-  }
-
-  function displayNameForItem(it){
-    const s = it.snapshot;
-    if(s && s.name_he) return s.name_he + (s.unit_he ? ` (${s.unit_he})` : "");
-    return "מוצר";
-  }
-  function displaySkuForItem(it){
-    return (it.snapshot && it.snapshot.sku) ? it.snapshot.sku : "";
-  }
-  function stockStatusBadge(it){
-    const snap = it.snapshot;
-    if(!snap || !Array.isArray(snap.stock) || !snap.stock.length) return `<span class="badge warn">אין מלאי</span>`;
-    const total = snap.stock.reduce((a,x)=>a + (Number(x.qty)||0), 0);
-    if(total <= 0) return `<span class="badge warn">אין מלאי</span>`;
-    return `<span class="badge">מלאי: ${escapeHtml(String(total))}</span>`;
-  }
-
-  function renderScanPreview(){
-    $("kpiCount").textContent = String(items.length);
-    $("kpiSum").textContent = String(sumQty());
-    $("finishBtn").disabled = items.length === 0;
-
-    const host = $("scanItemsPreview");
-    host.innerHTML = "";
-
-    if(items.length === 0){
-      host.innerHTML = `<div class="hint">עוד אין מוצרים. תתחיל לסרוק.</div>`;
-      return;
-    }
-
-    items.slice().reverse().forEach((it, revIdx)=>{
-      const idx = items.length - 1 - revIdx;
-
-      const name = displayNameForItem(it);
-      const sku = displaySkuForItem(it);
-
-      const d = document.createElement("details");
-      d.className = "item";
-      d.open = false; // תמיד מכווץ
-
-      d.innerHTML = `
+  host.innerHTML = items.slice().reverse().map((it,rev)=>{
+    const i = items.length-1-rev;
+    const s = it.snap;
+    const name = s?.name_he ? s.name_he + (s.unit_he?` (${s.unit_he})`:"") : "מוצר";
+    const sku = s?.sku ? `מק״ט: ${esc(s.sku)} · ` : "";
+    const tot = stockTotal(s);
+    const stockTag = (tot==null) ? `<span class="tag warn">אין נתונים</span>` : (tot<=0 ? `<span class="tag warn">אין מלאי</span>` : `<span class="tag">מלאי: ${esc(tot)}</span>`);
+    return `
+      <details>
         <summary>
-          <div class="itemTop">
-            <span class="badge">כמות: ${escapeHtml(String(it.qty))}</span>
-            ${stockStatusBadge(it)}
-            <div class="titleLine">
-              <div class="pname" title="${escapeAttr(name)}">${escapeHtml(name)}</div>
-              <div class="psub">
-                ${sku ? `מק״ט: ${escapeHtml(sku)} • ` : ``}
-                <span class="mono" title="${escapeAttr(it.barcode)}">${escapeHtml(it.barcode)}</span>
-              </div>
-            </div>
+          <div class="left">
+            <div class="name">${esc(name)}</div>
+            <div class="meta">${sku}<span class="mono">${esc(it.barcode)}</span></div>
           </div>
-          <div class="rightActions">
-            <button class="btn" type="button" onclick="editItem(${idx})">ערוך</button>
-            <button class="btn danger" type="button" onclick="deleteItem(${idx})">מחק</button>
+          <div class="row" style="flex:0 0 auto;gap:8px">
+            <span class="tag">כמות: ${esc(it.qty)}</span>
+            ${stockTag}
+            <button class="btn" type="button" onclick="editItem(${i})">ערוך</button>
+            <button class="btn bad" type="button" onclick="delItem(${i})">מחק</button>
           </div>
         </summary>
-
-        <div class="itemBody">
+        <div class="body">
           <div>
             <label>הערה לפריט</label>
-            <input value="${escapeAttr(it.note_he || "")}" disabled />
+            <input value="${esc(it.note||"")}" disabled />
           </div>
           <div>
             <label>מיקום במחסן</label>
-            <input value="${escapeAttr(it.snapshot ? whLocToText(it.snapshot.warehouse_location) : "—")}" disabled />
+            <input value="${esc(s?whText(s.warehouse_location):"—")}" disabled />
           </div>
         </div>
-      `;
-      host.appendChild(d);
-    });
-  }
+      </details>
+    `;
+  }).join("");
 
-  function editItem(index){
-    const it = items[index];
-    openQtyModal(it.barcode, index);
-  }
+  // תמיד מכווץ
+  host.querySelectorAll("details").forEach(d=>d.open=false);
+}
 
-  function goToReview(){
-    if(items.length === 0) return;
-    setMode("review");
-  }
-  function backToScan(){
-    setMode("scan");
-    renderScanPreview();
-  }
+function renderReview(){
+  const host = $("reviewList");
+  host.innerHTML = items.map((it,i)=>{
+    const s = it.snap;
+    const name = s?.name_he ? s.name_he + (s.unit_he?` (${s.unit_he})`:"") : "מוצר";
+    const sku = s?.sku ? `מק״ט: ${esc(s.sku)} · ` : "";
+    const tot = stockTotal(s);
+    const stockTag = (tot==null) ? `<span class="tag warn">אין נתונים</span>` : (tot<=0 ? `<span class="tag warn">אין מלאי</span>` : `<span class="tag">מלאי: ${esc(tot)}</span>`);
+    return `
+      <details>
+        <summary>
+          <div class="left">
+            <div class="name">${esc(name)}</div>
+            <div class="meta">${sku}<span class="mono">${esc(it.barcode)}</span></div>
+          </div>
+          <div class="row" style="flex:0 0 auto;gap:8px">
+            <span class="tag">#${i+1}</span>
+            <span class="tag">כמות: ${esc(it.qty)}</span>
+            ${stockTag}
+            <button class="btn" type="button" onclick="editItem(${i})">ערוך</button>
+            <button class="btn bad" type="button" onclick="delItem(${i})">מחק</button>
+          </div>
+        </summary>
+        <div class="body">
+          <div>
+            <label>כמות</label>
+            <input type="number" min="1" step="1" value="${esc(it.qty)}" oninput="updQty(${i},this.value)" />
+          </div>
+          <div>
+            <label>הערה</label>
+            <input value="${esc(it.note||"")}" oninput="updNote(${i},this.value)" />
+          </div>
+        </div>
+      </details>
+    `;
+  }).join("");
+  host.querySelectorAll("details").forEach(d=>d.open=false);
+  $("sendBtn").disabled = items.length===0;
+}
 
-  // ========= Review + Send =========
-  function buildPayload(){
-    const fromLoc = $("fromLoc").value;
-    const toLoc   = $("toLoc").value;
+function editItem(i){ openQty(items[i].barcode, i); }
+function delItem(i){ items.splice(i,1); renderScan(); if(mode==="review"){renderReview(); refreshJson();} }
+function updQty(i,v){ const n=Math.max(1,parseInt(v||"1",10)||1); items[i].qty=n; $("kSum").textContent=sumQty(); refreshJson(); }
+function updNote(i,v){ items[i].note=norm(v); refreshJson(); }
 
-    const p_items = items.map(it => ({
-      p_qty: Number(it.qty),
+function clearItems(){ items=[]; renderScan(); if(mode==="review"){renderReview(); refreshJson();} }
+function toReview(){ if(!items.length) return; setMode("review"); }
+function toScan(){ setMode("scan"); renderScan(); }
+
+/* ===================== Send ===================== */
+function payload(){
+  const fromLoc = $("fromLoc").value;
+  const toLoc = $("toLoc").value;
+  return {
+    p_items: items.map(it=>({
+      p_qty: +it.qty,
       p_source: "api",
       p_barcode: it.barcode,
-      p_note_he: (String(it.note_he || "").trim() || ""),
+      p_note_he: it.note || "",
       p_allow_negative: false,
       p_to_location_code: toLoc,
       p_from_location_code: fromLoc
-    }));
+    })),
+    p_api_key: SYSTEM_API_KEY
+  };
+}
+function refreshJson(){ $("jsonPrev").textContent = JSON.stringify(payload(), null, 2); }
 
-    return { p_items, p_api_key: SYSTEM_API_KEY };
-  }
+async function sendAll(){
+  toast(false);
+  if(!items.length) return;
 
-  function refreshJsonPreview(){
-    const payload = buildPayload();
-    $("jsonPreview").textContent = JSON.stringify(payload, null, 2);
-    $("sendBtn").disabled = items.length === 0;
-  }
+  if(!SYSTEM_API_KEY || SYSTEM_API_KEY.includes("PUT_")) return toast(true,"חסר SYSTEM_API_KEY","שים את מפתח המערכת בתוך הקוד.",false);
+  if(!SUPABASE_APIKEY || SUPABASE_APIKEY.includes("PUT_")) return toast(true,"חסר SUPABASE apikey","שים apikey בתוך הקוד.",false);
+  if(!SUPABASE_BEARER || SUPABASE_BEARER.includes("PUT_")) return toast(true,"חסר Authorization token","שים bearer token בתוך הקוד.",false);
 
-  function renderReview(){
-    refreshJsonPreview();
-
-    const host = $("reviewItems");
-    host.innerHTML = "";
-    if(items.length === 0){
-      host.innerHTML = `<div class="hint">אין מוצרים לשליחה. חזור לסריקה.</div>`;
-      $("sendBtn").disabled = true;
-      return;
+  $("sendBtn").disabled = true; $("sendBtn").textContent = "שולח...";
+  try{
+    const r = await fetch(BASE + RPC_TRANSFER, {method:"POST", headers:supaHeaders(), body:JSON.stringify(payload())});
+    const t = await r.text();
+    let j=null; try{j=t?JSON.parse(t):null}catch(e){}
+    if(r.ok){
+      showRes(true, "הצלחה ✅", (j?JSON.stringify(j,null,2):t||"(ריק)"));
+    } else {
+      showRes(false, "שגיאה ❌", (j?JSON.stringify(j,null,2):t||("HTTP "+r.status)));
     }
-
-    items.forEach((it, idx)=>{
-      const name = displayNameForItem(it);
-      const sku = displaySkuForItem(it);
-
-      const d = document.createElement("details");
-      d.className = "item";
-      d.open = false;
-
-      d.innerHTML = `
-        <summary>
-          <div class="itemTop">
-            <span class="badge">#${idx+1}</span>
-            <span class="badge">כמות: ${escapeHtml(String(it.qty))}</span>
-            ${stockStatusBadge(it)}
-            <div class="titleLine">
-              <div class="pname" title="${escapeAttr(name)}">${escapeHtml(name)}</div>
-              <div class="psub">
-                ${sku ? `מק״ט: ${escapeHtml(sku)} • ` : ``}
-                <span class="mono" title="${escapeAttr(it.barcode)}">${escapeHtml(it.barcode)}</span>
-              </div>
-            </div>
-          </div>
-          <div class="rightActions">
-            <button class="btn" type="button" onclick="editItem(${idx})">ערוך</button>
-            <button class="btn danger" type="button" onclick="deleteItem(${idx})">מחק</button>
-          </div>
-        </summary>
-        <div class="itemBody">
-          <div>
-            <label>כמות</label>
-            <input type="number" min="1" step="1" value="${escapeAttr(String(it.qty))}"
-              oninput="updateQtyInline(${idx}, this.value)" />
-          </div>
-          <div>
-            <label>הערה לפריט (אופציונלי)</label>
-            <input value="${escapeAttr(it.note_he || "")}"
-              oninput="updateNoteInline(${idx}, this.value)" />
-          </div>
-        </div>
-      `;
-      host.appendChild(d);
-    });
-  }
-
-  function updateQtyInline(index, v){
-    let n = Number(v);
-    if(!isFinite(n) || n < 1) return;
-    items[index].qty = Math.floor(n);
-    $("kpiCount").textContent = String(items.length);
-    $("kpiSum").textContent = String(sumQty());
-    refreshJsonPreview();
-  }
-  function updateNoteInline(index, v){
-    items[index].note_he = String(v || "");
-    refreshJsonPreview();
-  }
-
-  async function sendAll(){
-    hideToast();
-
-    const payload = buildPayload();
-
-    // guardrails
-    if(!SYSTEM_API_KEY || SYSTEM_API_KEY === "PUT_YOUR_SYSTEM_API_KEY_HERE"){
-      showToast("err", "חסר SYSTEM_API_KEY", "שים את מפתח המערכת בתוך הקוד ב-SYSTEM_API_KEY.");
-      return;
-    }
-    if(!SUPABASE_APIKEY || SUPABASE_APIKEY === "PUT_YOUR_SUPABASE_APIKEY_HERE" || !SUPABASE_BEARER_TOKEN || SUPABASE_BEARER_TOKEN === "PUT_YOUR_SUPABASE_BEARER_HERE"){
-      showToast("err", "חסרים headers של Supabase", "שים apikey ו-token בתוך הקוד (SUPABASE_APIKEY / SUPABASE_BEARER_TOKEN).");
-      return;
-    }
-    if(payload.p_items.length === 0){
-      showToast("err", "אין פריטים", "תוסיף לפחות פריט אחד.");
-      return;
-    }
-
-    $("sendBtn").disabled = true;
-    $("sendBtn").textContent = "שולח...";
-
-    try{
-      const res = await fetch(BASE + STOCK_TRANSFER_RPC, {
-        method: "POST",
-        headers: headersSupabase(),
-        body: JSON.stringify(payload)
-      });
-
-      const text = await res.text();
-      let data = null;
-      try { data = text ? JSON.parse(text) : null; } catch(e){}
-
-      if(res.ok){
-        openResultModal(true, "הצלחה ✅",
-          "הפעולה בוצעה בהצלחה.\n\nתגובה מהשרת:\n" + (data ? JSON.stringify(data, null, 2) : (text || "(ריק)"))
-        );
-      }else{
-        const errMsg = (data ? JSON.stringify(data, null, 2) : (text || `HTTP ${res.status}`));
-        openResultModal(false, "שגיאה ❌",
-          "הייתה שגיאה בביצוע הפעולה.\n\nפרטים:\n" + errMsg
-        );
-      }
-    }catch(err){
-      openResultModal(false, "שגיאה ❌", "קרתה שגיאה (רשת/דפדפן):\n" + String(err));
-    }finally{
-      $("sendBtn").disabled = false;
-      $("sendBtn").textContent = "שלח";
-    }
-  }
-
-  function openResultModal(ok, title, body){
-    $("resultTitle").textContent = title;
-    $("resultBody").textContent = body;
-
-    const primary = $("resultPrimaryBtn");
-    if(ok){
-      primary.className = "btn success";
-      primary.textContent = "חזרה להתחלה";
-      primary.onclick = resetToStart;
-    }else{
-      primary.className = "btn";
-      primary.textContent = "חזרה לרשימה";
-      primary.onclick = () => { closeResultModal(); setMode("review"); };
-    }
-    $("resultModal").classList.add("show");
-  }
-  function closeResultModal(){ $("resultModal").classList.remove("show"); }
-  function resetToStart(){
-    closeResultModal();
-    items = [];
-    $("fromLoc").value = "WAREHOUSE";
-    $("toLoc").value = "PICKING";
-    setMode("scan");
-    renderScanPreview();
-  }
-
-  // ========= Scan capture (no Enter required) =========
-  function onPotentialScanString(str){
-    const bc = normalizeBarcode(str);
-    if(!isLikelyBarcode(bc)) return;
-
-    scanBuffer = "";
-    $("manualBarcode").value = "";
-    openQtyModal(bc);
-  }
-
-  function handleGlobalKeydown(e){
-  const now = Date.now();
-  const dt = now - lastKeyTs;
-  lastKeyTs = now;
-
-  // זיהוי burst של סורק (תווים מהירים)
-  if(dt > 0 && dt < 45){
-    isScannerBurst = true;
-    if(burstResetTimer) clearTimeout(burstResetTimer);
-    burstResetTimer = setTimeout(() => {
-      isScannerBurst = false;
-    }, 250);
-  }
-
-  const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
-  const isTypingField = ["input","textarea","select"].includes(tag);
-  const isManual = e.target === $("manualBarcode");
-
-  // אם זה לא סורק ואנחנו בשדה רגיל – לא נוגעים
-  if(!isScannerBurst && isTypingField && !isManual) return;
-
-  // אם זה סורק – חוסמים התנהגות ברירת מחדל
-  if(isScannerBurst) e.preventDefault();
-
-  if(e.key && e.key.length === 1){
-    scanBuffer += e.key;
-
-    if(scanTimer) clearTimeout(scanTimer);
-    scanTimer = setTimeout(()=>{
-      const candidate = scanBuffer;
-      scanBuffer = "";
-      onPotentialScanString(candidate);
-    }, 120);
+  } catch(err){
+    showRes(false,"שגיאה ❌",String(err));
+  } finally {
+    $("sendBtn").disabled = false; $("sendBtn").textContent = "שלח";
   }
 }
 
-
-  function handleManualInput(){
-    const v = $("manualBarcode").value;
-    if(manualTimer) clearTimeout(manualTimer);
-    manualTimer = setTimeout(()=>{
-      if(isLikelyBarcode(v)){
-        onPotentialScanString(v);
-      }
-    }, 220);
-  }
-
-  // ========= Safe HTML =========
-  function escapeHtml(s){
-    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-  }
-  function escapeAttr(s){
-    return escapeHtml(s).replaceAll("'","&#39;");
-  }
-
-  // ========= INIT =========
-  window.addEventListener("keydown", handleGlobalKeydown);
-  $("manualBarcode").addEventListener("input", handleManualInput);
-
-  ["fromLoc","toLoc"].forEach(id=>{
-    $(id).addEventListener("change", ()=>{ if(currentMode === "review") refreshJsonPreview(); });
-  });
-
-  renderScanPreview();
+function showRes(ok, title, body){
+  $("rTitle").textContent = title;
+  $("rBody").textContent = body;
+  $("rBtn").className = "btn " + (ok ? "ok" : "");
+  $("rBtn").textContent = ok ? "חזרה להתחלה" : "חזרה לרשימה";
+  $("rBtn").onclick = ok ? resetAll : ()=>{ closeRes(); setMode("review"); };
+  $("resModal").classList.add("show");
+}
+function closeRes(){ $("resModal").classList.remove("show"); focusSink(); }
+function resetAll(){
+  closeRes();
+  items = [];
+  $("fromLoc").value = "WAREHOUSE";
+  $("toLoc").value = "PICKING";
   setMode("scan");
+  renderScan();
+}
+
+/* ===================== Manual input ===================== */
+$("manual").addEventListener("input", ()=>{
+  const v = $("manual").value;
+  if(manualTimer) clearTimeout(manualTimer);
+  manualTimer = setTimeout(()=>{ if(isBarcode(v)) { $("manual").value=""; onScanned(v); } }, 180);
+});
+
+/* ===================== Sink events + init ===================== */
+$("scanSink").addEventListener("input", onSinkInput);
+setMode("scan");
+renderScan();
+setTimeout(focusSink, 0);
 </script>
 </body>
 </html>
