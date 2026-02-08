@@ -263,25 +263,8 @@ function cleanBarcode(raw){
   s = s.replace(/[^\d]/g, ""); // digits-only (EAN/UPC)
   return s;
 }
-function isValidEan(code){
-  const s = cleanBarcode(code);
-  if(![8,12,13].includes(s.length)) return false;
-  const digits = s.split("").map(Number);
-  const check = digits.pop();
-  let sum = 0;
-  for(let i=digits.length-1, pos=1; i>=0; i--, pos++){
-    sum += digits[i] * (pos % 2 === 1 ? 3 : 1);
-  }
-  const calc = (10 - (sum % 10)) % 10;
-  return calc === check;
-}
 function normalizeBarcode(raw){
-  const cleaned = cleanBarcode(raw);
-  if(cleaned.length<6) return cleaned;
-  if(isValidEan(cleaned)) return cleaned;
-  const reversed = cleaned.split("").reverse().join("");
-  if(isValidEan(reversed)) return reversed;
-  return cleaned;
+  return cleanBarcode(raw);
 }
 const isBarcode = (s)=>normalizeBarcode(s).length>=6;
 const esc = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
