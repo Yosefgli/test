@@ -347,6 +347,10 @@
   let scanBuffer = "";
   let scanTimer = null;
   let manualTimer = null;
+  let lastKeyTs = 0;
+  let isScannerBurst = false;
+  let burstResetTimer = null;
+
 
   let pendingBarcode = null;
   let editingIndex = null;
@@ -384,6 +388,11 @@
       $("mainTitle").textContent = "סקירה ושליחה";
       renderReview();
       refreshJsonPreview();
+      scanBuffer = "";
+if(scanTimer){
+  clearTimeout(scanTimer);
+  scanTimer = null;
+}
     }
   }
 
@@ -880,22 +889,41 @@
   }
 
   function handleGlobalKeydown(e){
-    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
-    const isTypingField = ["input","textarea","select"].includes(tag);
-    const isManual = e.target === $("manualBarcode");
-    if(isTypingField && !isManual) return;
+  const now = Date.now();
+  const dt = now - lastKeyTs;
+  lastKeyTs = now;
 
-    if(e.key && e.key.length === 1){
-      scanBuffer += e.key;
-
-      if(scanTimer) clearTimeout(scanTimer);
-      scanTimer = setTimeout(()=>{
-        const candidate = scanBuffer;
-        scanBuffer = "";
-        onPotentialScanString(candidate);
-      }, 180);
-    }
+  // זיהוי burst של סורק (תווים מהירים)
+  if(dt > 0 && dt < 45){
+    isScannerBurst = true;
+    if(burstResetTimer) clearTimeout(burstResetTimer);
+    burstResetTimer = setTimeout(() => {
+      isScannerBurst = false;
+    }, 250);
   }
+
+  const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+  const isTypingField = ["input","textarea","select"].includes(tag);
+  const isManual = e.target === $("manualBarcode");
+
+  // אם זה לא סורק ואנחנו בשדה רגיל – לא נוגעים
+  if(!isScannerBurst && isTypingField && !isManual) return;
+
+  // אם זה סורק – חוסמים התנהגות ברירת מחדל
+  if(isScannerBurst) e.preventDefault();
+
+  if(e.key && e.key.length === 1){
+    scanBuffer += e.key;
+
+    if(scanTimer) clearTimeout(scanTimer);
+    scanTimer = setTimeout(()=>{
+      const candidate = scanBuffer;
+      scanBuffer = "";
+      onPotentialScanString(candidate);
+    }, 120);
+  }
+}
+
 
   function handleManualInput(){
     const v = $("manualBarcode").value;
