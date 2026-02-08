@@ -17,6 +17,8 @@
     h1{margin:0;font-size:18px}
     .sub{margin:4px 0 0;color:var(--mut);font-size:13px}
     .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;white-space:nowrap}
+    .modeToggle{font-size:12px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;white-space:nowrap;cursor:pointer;color:var(--txt);font-weight:700}
+    .modeToggle:hover{background:#f8fafc}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
     .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:linear-gradient(#fff,#f8fafc)}
     .hd b{font-size:14px}
@@ -34,6 +36,9 @@
     .btn.bad{border-color:rgba(220,38,38,.25);color:var(--bad)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .hint{color:var(--mut);font-size:12px}
+    .manualEntry{margin-top:10px;border:1px dashed var(--line);border-radius:14px;padding:10px 12px;background:#fff}
+    .manualEntry .row{align-items:flex-end}
+    .manualEntry input{direction:ltr;unicode-bidi:plaintext;text-align:left}
 
     .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .kpi .box{flex:1;min-width:160px;border:1px solid var(--line);border-radius:14px;padding:10px;background:linear-gradient(#fff,#f8fafc)}
@@ -161,7 +166,7 @@
         <h1>העברת מלאי לפי ברקוד</h1>
         <div class="sub">סרוק → פרטי מוצר → כמות → סיום → שליחה אחת</div>
       </div>
-      <div class="pill" id="modePill">מצב סריקה</div>
+      <button class="modeToggle" id="modeToggle" type="button" onclick="toggleInputMode()">מצב כתיבה</button>
     </header>
 
     <div class="card">
@@ -180,6 +185,14 @@
           <div class="box"><p class="n" id="kSum">0</p><p class="t">סה״כ יחידות</p></div>
         </div>
         <div class="hint">תסרוק ברקוד. לא צריך Enter.</div>
+        <div class="manualEntry" id="manualEntry" style="display:none">
+          <label for="manualBarcode">הקלדת ברקוד ידנית</label>
+          <div class="row" style="gap:8px">
+            <input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="הקלד ברקוד והקש Enter" />
+            <button class="btn pri" type="button" onclick="submitManualBarcode()">הוסף</button>
+          </div>
+          <div class="hint">מצב כתיבה פעיל — הסריקה כבויה עד שחוזרים למצב סריקה.</div>
+        </div>
         <div style="height:10px"></div>
         <div class="items" id="scanList"></div>
       </div>
@@ -233,6 +246,7 @@ const SUPABASE_BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 /* ===================== STATE ===================== */
 const $ = (id)=>document.getElementById(id);
 let mode="scan";
+let inputMode="scan";
 let items=[]; // {barcode, qty, note, snap?}
 const snapCache=new Map();
 let pendingBarcode=null, editIndex=null;
@@ -249,7 +263,27 @@ function cleanBarcode(raw){
   s = s.replace(/[^\d]/g, ""); // digits-only (EAN/UPC)
   return s;
 }
-const isBarcode = (s)=>cleanBarcode(s).length>=6;
+function isValidEan(code){
+  const s = cleanBarcode(code);
+  if(![8,12,13].includes(s.length)) return false;
+  const digits = s.split("").map(Number);
+  const check = digits.pop();
+  let sum = 0;
+  for(let i=digits.length-1, pos=1; i>=0; i--, pos++){
+    sum += digits[i] * (pos % 2 === 1 ? 3 : 1);
+  }
+  const calc = (10 - (sum % 10)) % 10;
+  return calc === check;
+}
+function normalizeBarcode(raw){
+  const cleaned = cleanBarcode(raw);
+  if(cleaned.length<6) return cleaned;
+  if(isValidEan(cleaned)) return cleaned;
+  const reversed = cleaned.split("").reverse().join("");
+  if(isValidEan(reversed)) return reversed;
+  return cleaned;
+}
+const isBarcode = (s)=>normalizeBarcode(s).length>=6;
 const esc = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
 const sumQty = ()=>items.reduce((a,x)=>a+(+x.qty||0),0);
 const whText = (wh)=> wh ? `אזור ${wh.zone ?? "—"} · מדף ${wh.shelf ?? "—"} · תא ${wh.bin ?? "—"}` : "—";
@@ -266,7 +300,6 @@ function toast(show, title="", desc="", ok=true){
 
 function setMode(m){
   mode=m;
-  $("modePill").textContent = (m==="scan") ? "מצב סריקה" : "מצב סיום";
   $("title").textContent = (m==="scan") ? "סריקה והוספת מוצרים" : "סקירה ושליחה";
   $("scanView").style.display = (m==="scan") ? "block" : "none";
   $("reviewView").style.display = (m==="scan") ? "none" : "block";
@@ -275,10 +308,26 @@ function setMode(m){
 }
 
 function focusSink(){
-  if(mode!=="scan") return;
+  if(mode!=="scan" || inputMode!=="scan") return;
   if($("qtyMo").classList.contains("show")) return;
   if($("resMo").classList.contains("show")) return;
   $("scanSink").focus();
+}
+function setInputMode(nextMode){
+  inputMode = nextMode;
+  $("manualEntry").style.display = (inputMode==="write") ? "block" : "none";
+  $("modeToggle").textContent = (inputMode==="write") ? "מצב סריקה" : "מצב כתיבה";
+  $("modeToggle").setAttribute("aria-pressed", inputMode==="write" ? "true" : "false");
+  if(inputMode==="write"){
+    $("manualBarcode").value = "";
+    setTimeout(()=>$("manualBarcode").focus(), 0);
+  } else {
+    focusSink();
+  }
+}
+function toggleInputMode(){
+  if(mode!=="scan") return;
+  setInputMode(inputMode==="scan" ? "write" : "scan");
 }
 
 /* ===================== SUPABASE ===================== */
@@ -323,11 +372,11 @@ async function fetchSnapshot(barcode){
 /* ===================== SCAN CAPTURE ===================== */
 // 1) sink (עובד אם יש פוקוס)
 $("scanSink").addEventListener("input", ()=>{
-  if(mode!=="scan") { $("scanSink").value=""; return; }
+  if(mode!=="scan" || inputMode!=="scan") { $("scanSink").value=""; return; }
   const v = $("scanSink").value;
   if(sinkTimer) clearTimeout(sinkTimer);
   sinkTimer = setTimeout(()=>{
-    const code = cleanBarcode(v);
+    const code = normalizeBarcode(v);
     $("scanSink").value = "";
     if(isBarcode(code)) onScanned(code);
   }, 70);
@@ -335,7 +384,7 @@ $("scanSink").addEventListener("input", ()=>{
 
 // 2) keydown fallback (עובד כשאין פוקוס input — רוב הסורקים)
 function onKeydownScan(e){
-  if(mode!=="scan") return;
+  if(mode!=="scan" || inputMode!=="scan") return;
   if($("qtyMo").classList.contains("show") || $("resMo").classList.contains("show")) return;
 
   if(!e.key || e.key.length!==1) return;
@@ -356,7 +405,7 @@ function onKeydownScan(e){
   kbuf += e.key;
   if(ktimer) clearTimeout(ktimer);
   ktimer = setTimeout(()=>{
-    const code = cleanBarcode(kbuf);
+    const code = normalizeBarcode(kbuf);
     kbuf = "";
     if(isBarcode(code)) onScanned(code);
   }, 90);
@@ -369,12 +418,14 @@ document.addEventListener("click", ()=>setTimeout(focusSink,0), true);
 /* ===================== FLOW ===================== */
 function onScanned(code){
   if(mode!=="scan") return;
-  openQty(code);
+  const normalized = normalizeBarcode(code);
+  if(!isBarcode(normalized)) return;
+  openQty(normalized);
 }
 
 /* ===================== QTY MODAL ===================== */
 async function openQty(barcode, idx=null){
-  pendingBarcode = cleanBarcode(barcode);
+  pendingBarcode = normalizeBarcode(barcode);
   editIndex = idx;
 
   if(idx!=null){
@@ -553,6 +604,21 @@ function clearItems(){ items=[]; renderScan(); if(mode==="review") renderReview(
 function toReview(){ if(!items.length) return; setMode("review"); }
 function toScan(){ setMode("scan"); renderScan(); focusSink(); }
 
+function submitManualBarcode(){
+  if(mode!=="scan" || inputMode!=="write") return;
+  const val = $("manualBarcode").value;
+  const code = normalizeBarcode(val);
+  if(!isBarcode(code)) return toast(true,"ברקוד לא תקין","בדוק שהקלדת ברקוד תקין.",false);
+  $("manualBarcode").value = "";
+  onScanned(code);
+}
+$("manualBarcode").addEventListener("keydown", (e)=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    submitManualBarcode();
+  }
+});
+
 /* ===================== SEND ===================== */
 function payload(){
   const fromLoc=$("fromLoc").value, toLoc=$("toLoc").value;
@@ -614,6 +680,7 @@ function resetAll(){
 
 /* ===================== INIT ===================== */
 setMode("scan");
+setInputMode("scan");
 renderScan();
 setTimeout(focusSink, 0);
 </script>
